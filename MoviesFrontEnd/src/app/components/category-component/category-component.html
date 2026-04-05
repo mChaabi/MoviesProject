@@ -1,0 +1,65 @@
+<div class="category-container">
+  <aside class="sidebar">
+    <h3>Gestion des Catégories</h3>
+
+    <div class="add-cat-card">
+      <div class="input-group">
+        <label>Nom</label>
+        <input type="text" [(ngModel)]="newCategoryName" placeholder="Ex: Action, Drame...">
+      </div>
+
+      <div class="input-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="newCategoryDescription" placeholder="Description courte..." rows="2"></textarea>
+      </div>
+
+      <button (click)="onAddCategory()" class="btn-submit" [disabled]="!newCategoryName()">
+        Ajouter la catégorie
+      </button>
+    </div>
+
+    <hr>
+
+    <ul class="cat-list">
+      <li [class.active]="selectedCategoryId() === null" (click)="onSelectCategory(null)">
+        <span class="cat-name">Tous les films</span>
+        <span class="count">{{ movies().length }}</span>
+      </li>
+
+      @for (cat of categories(); track $index ) {
+        <li [class.active]="selectedCategoryId() === cat.id">
+          <div class="cat-info" (click)="onSelectCategory(cat.id!)">
+            <span class="cat-name">{{ cat.name }}</span>
+            <small class="cat-desc" *ngIf="cat.description">{{ cat.description }}</small>
+          </div>
+          <button class="btn-del" (click)="onDeleteCategory(cat.id!)" title="Supprimer">×</button>
+        </li>
+      }
+    </ul>
+  </aside>
+
+  <main class="movie-grid">
+    <header class="grid-header">
+      <h2>Films : {{ selectedCategoryId() ? 'Filtre par catégorie' : 'Tous les films' }}</h2>
+      <p class="stats">{{ filteredMovies().length }} film(s) trouvé(s)</p>
+    </header>
+
+    <div class="grid">
+      @for (movie of filteredMovies(); track movie.id) {
+        <div class="movie-card">
+          <div class="video-preview">
+            <span class="play-icon">▶</span>
+          </div>
+          <div class="card-content">
+            <h4>{{ movie.title }}</h4>
+            <p>{{ movie.description }}</p>
+          </div>
+        </div>
+      } @empty {
+        <div class="empty-state">
+          <p>Aucun film n'est encore associé à cette catégorie.</p>
+        </div>
+      }
+    </div>
+  </main>
+</div>

@@ -1,0 +1,96 @@
+/* Variables pour garder une cohérence de couleur */
+:root {
+  --primary-color: #667eea;
+  --dark-color: #333;
+  --bg-light: #f4f7fe;
+}
+
+.main-nav {
+  height: 70px;
+  background: white;
+  display: flex;
+  justify-content: space-between; /* Espace entre logo et liens */
+  align-items: center;
+  padding: 0 10%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--dark-color);
+  cursor: pointer;
+  letter-spacing: -1px;
+}
+
+.logo span {
+  color: var(--primary-color);
+}
+
+.nav-actions a {
+  text-decoration: none;
+  color: #666;
+  margin-left: 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+}
+
+.nav-actions a:hover {
+  color: var(--primary-color);
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.active-link {
+  color: var(--primary-color) !important;
+  border-bottom: 2px solid var(--primary-color);
+  border-radius: 0 !important;
+}
+
+.content-area {
+  min-height: calc(100vh - 140px); /* 70px nav + 70px footer */
+  background-color: var(--bg-light);
+  display: flex;
+  flex-direction: column;
+}
+
+.main-footer {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-top: 1px solid #eee;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* Animation fluide lors du changement de page */
+router-outlet + * {
+  display: block;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+.nav-actions {
+  display: flex;
+  gap: 10px; /* Ajoute un petit espace entre les liens */
+}
+
+.nav-actions a {
+  font-size: 0.95rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+

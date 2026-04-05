@@ -1,0 +1,128 @@
+<div class="dashboard-container">
+  <aside class="upload-section">
+    <div class="glass-card">
+      <h3>🎬 Ajouter un Film</h3>
+      <form [formGroup]="movieForm" (ngSubmit)="onAddMovie()">
+        <div class="input-group">
+          <label>Catégorie du film</label>
+          <select formControlName="categoryId">
+            <option [ngValue]="null">Choisir une catégorie...</option>
+            @for (cat of categories(); track cat.id) {
+            <option [ngValue]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Titre</label>
+          <input type="text" formControlName="title" placeholder="Nom du film...">
+        </div>
+
+        <div class="input-group">
+          <label>Description</label>
+          <textarea formControlName="description" placeholder="De quoi parle le film ?"></textarea>
+        </div>
+
+        <div class="input-group">
+          <label class="file-label" [class.file-selected]="selectedFile">
+            <div class="file-content">
+              <span>{{ selectedFile ? selectedFile.name : 'Choisir la vidéo (.mp4)' }}</span>
+              @if (selectedFile) {
+              <small class="file-size">
+                {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} Mo / 500 Mo
+              </small>
+              }
+            </div>
+            <input type="file" (change)="onFileSelected($event)" accept="video/*" hidden>
+          </label>
+        </div>
+
+        <button type="submit" [disabled]="movieForm.invalid || !selectedFile || isLoading()" class="submit-btn">
+          @if (isLoading()) {
+          <span class="loader">⏳</span> Envoi en cours...
+          } @else {
+          <span>🚀 Partager la vidéo</span>
+          }
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="movies-grid">
+    @for (movie of movies(); track movie.id) {
+    <div class="movie-card">
+      <div class="video-container">
+        <video controls preload="metadata">
+          <source [src]="'http://localhost:8080' + movie.videoUrl" type="video/mp4">
+          Votre navigateur ne supporte pas la lecture de vidéos.
+        </video>
+      </div>
+
+      <div class="movie-info">
+        <h4>{{ movie.title }}</h4>
+        <p>{{ movie.description }}</p>
+        <div class="tags-container">
+          @for (tag of movie.tags; track tag.id) {
+          <span class="tag-badge">#{{ tag.label }}</span>
+          }
+        </div>
+
+        <div class="author-block">
+          <div class="author-tag">
+            👤 {{ movie.authorEmail || movie.authorName || 'Anonyme' }}
+          </div>
+
+          @if (movie.authorId !== currentUserId) {
+          <button class="follow-btn" [class.following]="isFollowing(movie.authorId!)"
+            (click)="onFollowToggle(movie.authorId!)">
+            {{ isFollowing(movie.authorId!) ? '✓ Abonné' : '+ Suivre' }}
+          </button>
+          }
+        </div>
+
+        <div class="movie-footer">
+          <div class="actions-group">
+            <button class="like-btn" [class.liked]="getLikeInfo(movie.id!).isLiked" (click)="onLikeToggle(movie.id!)">
+              <span class="heart">{{ getLikeInfo(movie.id!).isLiked ? '❤️' : '🤍' }}</span>
+              <span class="count">{{ getLikeInfo(movie.id!).count }}</span>
+            </button>
+
+            <div class="comment-count-badge">
+              💬 {{ getComments(movie.id!).length }}
+            </div>
+          </div>
+        </div>
+
+        <hr class="separator">
+
+        <div class="comments-section">
+          <h5>Commentaires</h5>
+          <div class="comments-list">
+            @for (comment of getComments(movie.id!); track comment.id) {
+            <div class="comment-item">
+              <span class="comment-user">Utilisateur #{{ comment.userId }} :</span>
+              <span class="comment-content">{{ comment.content }}</span>
+            </div>
+            } @empty {
+            <p class="no-comments">Aucun commentaire pour le moment.</p>
+            }
+          </div>
+
+          <div class="comment-form">
+            <input type="text" [(ngModel)]="newCommentText[movie.id!]" placeholder="Écrire un commentaire..."
+              (keyup.enter)="onAddComment(movie.id!)">
+            <button (click)="onAddComment(movie.id!)" [disabled]="!newCommentText[movie.id!]">
+              Envoyer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    } @empty {
+    <div class="empty-state">
+      <div class="empty-icon">🎥</div>
+      <p>Aucun film disponible. Soyez le premier à en ajouter !</p>
+    </div>
+    }
+  </main>
+</div>

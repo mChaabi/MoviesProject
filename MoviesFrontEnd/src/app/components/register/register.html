@@ -1,0 +1,44 @@
+<div class="main-wrapper">
+  <div class="glass-card">
+    <h2>Inscription</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="votre@email.com"
+               [class.invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+
+        @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+          <div class="error-msg">
+            @if (registerForm.get('email')?.errors?.['required']) { L'email est obligatoire. }
+            @if (registerForm.get('email')?.errors?.['email'] || registerForm.get('email')?.errors?.['pattern']) {
+              Format d'email invalide.
+            }
+          </div>
+        }
+      </div>
+
+      <div class="input-group">
+        <label>Mot de passe</label>
+        <input type="password" formControlName="password" placeholder="••••••••"
+               [class.invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+
+        @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+          <div class="error-msg">
+            @if (registerForm.get('password')?.errors?.['required']) { Requis. }
+            @if (registerForm.get('password')?.errors?.['minlength']) { 8 caractères minimum. }
+            @if (registerForm.get('password')?.errors?.['pattern']) {
+              Doit contenir une majuscule et un chiffre.
+            }
+          </div>
+        }
+      </div>
+
+      <button type="submit" [disabled]="registerForm.invalid || isLoading()" class="submit-btn">
+        {{ isLoading() ? 'Chargement...' : 'S\'inscrire' }}
+      </button>
+
+    </form>
+  </div>
+</div>

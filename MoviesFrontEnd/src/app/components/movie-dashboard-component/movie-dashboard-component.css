@@ -1,0 +1,303 @@
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  min-height: 100vh;
+  color: white;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: sticky;
+  top: 2rem;
+}
+
+.movies-grid {
+  display: grid;
+  /* On passe de 300px à 380px minimum pour chaque carte */
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 2.5rem; /* Augmente l'espace entre les cartes */
+}
+
+.movie-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  /* Nouvelles règles */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.movie-card:hover { transform: translateY(-5px); }
+
+.video-container video {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+}
+
+.movie-info {
+  padding: 1.5rem; /* Augmente l'espace intérieur (était à 1rem) */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Permet au contenu de s'étirer pour remplir la carte */
+}
+.movie-info h4 { margin: 0 0 0.5rem; color: #00d2ff; }
+
+.file-label {
+  display: block;
+  padding: 1rem;
+  border: 2px dashed rgba(255,255,255,0.3);
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(255,255,255,0.05);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 1rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(to right, #00d2ff, #3a7bd5);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .dashboard-container { grid-template-columns: 1fr; }
+  .upload-section { order: -1; }
+}
+
+
+/* ... (Garder ton CSS existant) */
+
+.movie-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.like-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 5px 12px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.like-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.like-btn.liked {
+  border-color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.2);
+}
+
+.like-btn .heart {
+  font-size: 1.2rem;
+}
+
+.like-btn .count {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+
+.movie-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto; /* Pousse le footer vers le bas */
+  padding-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.actions-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.separator {
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 10px 0;
+}
+
+.comments-section h5 {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  color: #ccc;
+}
+
+.comments-list {
+  max-height: 180px; /* Un peu plus grand pour la lisibilité */
+  overflow-y: auto;
+  margin-bottom: 15px;
+  padding-right: 5px; /* Espace pour la barre de défilement */
+}
+
+/* Style de la barre de défilement pour les commentaires */
+.comments-list::-webkit-scrollbar {
+  width: 4px;
+}
+.comments-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.comment-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  font-size: 0.85rem;
+}
+
+.comment-user {
+  font-weight: bold;
+  color: #3498db;
+  margin-right: 5px;
+}
+
+.comment-form {
+  display: flex;
+  gap: 5px;
+}
+
+.comment-form input {
+  flex: 1;
+  padding: 10px 15px;
+  border-radius: 20px; /* Plus arrondi */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+  font-size: 0.9rem;
+  outline: none;
+}
+.comment-form button {
+  padding: 8px 16px;
+  background: #00d2ff;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+.comment-form button:disabled {
+  background: #555;
+  cursor: not-allowed;
+}
+
+.file-size {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+.submit-btn:disabled {
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+
+
+
+.author-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Sépare l'email du bouton */
+  gap: 12px;
+  margin: 1rem 0; /* Ajoute de l'espace au dessus et en dessous */
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.03); /* Léger fond pour détacher l'auteur */
+  border-radius: 8px;
+}
+
+/* Style du bouton Follow */
+.follow-btn {
+    background-color: transparent;
+    border: 1.5px solid #e50914; /* Rouge cinéma */
+    color: #e50914;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+}
+
+/* Effet au survol */
+.follow-btn:hover {
+    background-color: #e50914;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Style quand on est déjà abonné (Following) */
+.follow-btn.following {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #555;
+    color: #aaa;
+}
+
+.follow-btn.following:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-color: #e50914;
+    color: #e50914;
+}
+
+/* Petit ajustement pour l'icône avatar */
+.avatar-icon {
+    margin-right: 5px;
+    font-size: 1.1rem;
+}
+
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.tag-badge {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #a29bfe; /* Une couleur violette douce */
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.tag-badge:hover {
+  background: #a29bfe;
+  color: white;
+  transform: translateY(-2px);
+}
