@@ -1,0 +1,176 @@
+<div class="watchlist-container">
+
+  <!-- HEADER -->
+  <header class="watchlist-header">
+    <div class="header-content">
+      <h1>Ma Liste</h1>
+      <div class="stats-bar">
+        <span>🎬 {{ watchlist() | movieTypeCount:'MOVIE' }} Films</span>
+        <span class="sep">|</span>
+        <span>📺 {{ watchlist() | movieTypeCount:'SERIES' }} Séries</span>
+      </div>
+      <p class="subtitle">{{ watchlist().length }} titres enregistrés</p>
+    </div>
+    <div class="filter-bar">
+      <button [class.active]="activeFilter() === 'ALL'" (click)="setFilter('ALL')">Tout</button>
+      <button [class.active]="activeFilter() === 'MOVIE'" (click)="setFilter('MOVIE')">Films</button>
+      <button [class.active]="activeFilter() === 'SERIES'" (click)="setFilter('SERIES')">Séries</button>
+    </div>
+  </header>
+
+  <!-- LOADING -->
+  @if (isLoading()) {
+    <div class="loader-container">
+      <div class="spinner"></div>
+      <p>Chargement de votre collection...</p>
+    </div>
+  } @else {
+
+    @if (filteredList().length > 0) {
+      <div class="watchlist-grid">
+        @for (item of filteredList(); track item.movieId) {
+          <div class="watchlist-card" (click)="openDetails(item)">
+
+            <!-- POSTER -->
+            <div class="poster-wrapper">
+
+              @if (item.isLoadingDetails) {
+                <div class="poster-skeleton"></div>
+              } @else if (item.movieDetails && getThumbnail(item.movieDetails)) {
+                <img [src]="getThumbnail(item.movieDetails)!" [alt]="item.movieTitle">
+              } @else if (item.movieType === 'SERIES') {
+                <div class="poster-placeholder">📺</div>
+              } @else {
+                <div class="poster-placeholder">🎬</div>
+              }
+
+              <!-- OVERLAY AU HOVER -->
+              <div class="poster-overlay">
+                <div class="overlay-play">▶</div>
+                <span class="overlay-label">
+                  {{ item.movieType === 'SERIES' ? 'Voir la série' : 'Regarder' }}
+                </span>
+              </div>
+
+              <!-- BADGE TYPE -->
+              <span class="type-badge" [class.series]="item.movieType === 'SERIES'">
+                {{ item.movieType === 'SERIES' ? 'Série' : 'Film' }}
+              </span>
+
+              <!-- BOUTON SUPPRIMER -->
+              <button class="remove-btn"
+                      (click)="$event.stopPropagation(); removeItem(item.movieId)"
+                      title="Retirer de la liste">×</button>
+
+              <!-- BARRE DE PROGRESSION si disponible -->
+              @if (item.movieDetails?.rating) {
+                <div class="rating-chip">⭐ {{ item.movieDetails!.rating }}</div>
+              }
+            </div>
+
+            <!-- INFOS SOUS LE POSTER -->
+            <div class="card-info">
+              <h3>{{ item.movieTitle || item.movieDetails?.title || '...' }}</h3>
+              <div class="card-meta">
+                @if (item.movieDetails?.releaseYear) {
+                  <span>{{ item.movieDetails!.releaseYear }}</span>
+                }
+                @if (item.movieDetails?.durationMinutes && item.movieType === 'MOVIE') {
+                  <span>{{ item.movieDetails!.durationMinutes }} min</span>
+                }
+                @if (item.movieType === 'SERIES' && item.movieDetails?.totalSeasons) {
+                  <span>{{ item.movieDetails!.totalSeasons }} saison(s)</span>
+                }
+              </div>
+              <p class="added-date">Ajouté le {{ item.addedAt | date:'dd/MM/yy' }}</p>
+            </div>
+
+          </div>
+        }
+      </div>
+
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">📂</div>
+        <h3>Votre liste est vide</h3>
+        <p>Parcourez le catalogue pour ajouter vos programmes préférés.</p>
+        <a routerLink="/" class="explore-btn">Explorer le catalogue →</a>
+      </div>
+    }
+  }
+
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- MODAL DÉTAILS DU FILM         -->
+<!-- ══════════════════════════════ -->
+@if (selectedMovie()) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+
+      <!-- Image / Thumbnail -->
+      <div class="modal-poster">
+        @if (getThumbnail(selectedMovie()!)) {
+          <img [src]="getThumbnail(selectedMovie()!)!" [alt]="selectedMovie()!.title">
+        } @else if (selectedMovie()!.type === 'SERIES') {
+          <div class="modal-placeholder">📺</div>
+        } @else {
+          <div class="modal-placeholder">🎬</div>
+        }
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+
+      <!-- Détails -->
+      <div class="modal-body">
+
+        <!-- Type badge -->
+        <div class="modal-type-badge" [class.series]="selectedMovie()!.type === 'SERIES'">
+          {{ selectedMovie()!.type === 'SERIES' ? '📺 Série' : '🎬 Film' }}
+        </div>
+
+        <h2>{{ selectedMovie()!.title }}</h2>
+
+        <!-- Méta -->
+        <div class="modal-meta">
+          @if (selectedMovie()!.rating) {
+            <span class="meta-rating">⭐ {{ selectedMovie()!.rating }}/10</span>
+          }
+          @if (selectedMovie()!.releaseYear) {
+            <span>{{ selectedMovie()!.releaseYear }}</span>
+          }
+          @if (selectedMovie()!.durationMinutes && selectedMovie()!.type === 'MOVIE') {
+            <span>{{ selectedMovie()!.durationMinutes }} min</span>
+          }
+          @if (selectedMovie()!.categoryName) {
+            <span class="meta-cat">{{ selectedMovie()!.categoryName }}</span>
+          }
+          @if (selectedMovie()!.type === 'SERIES' && selectedMovie()!.totalSeasons) {
+            <span>{{ selectedMovie()!.totalSeasons }} saison(s)</span>
+          }
+        </div>
+
+        <!-- Description -->
+        @if (selectedMovie()!.description) {
+          <p class="modal-desc">{{ selectedMovie()!.description }}</p>
+        }
+
+        <!-- Auteur -->
+        <div class="modal-author">
+          👤 Partagé par {{ selectedMovie()!.authorEmail || selectedMovie()!.authorName || 'Anonyme' }}
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="modal-actions">
+          <button class="btn-watch" (click)="goWatch(selectedMovie()!)">
+            ▶ {{ selectedMovie()!.type === 'SERIES' ? 'Voir les saisons' : 'Regarder maintenant' }}
+          </button>
+          <button class="btn-remove-modal"
+                  (click)="removeItem(selectedMovie()!.id!); closeModal()">
+            🗑 Retirer de ma liste
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+}

@@ -1,50 +1,55 @@
+// ✅ MODIFIÉ — src/app/services/movie-service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Movie } from '../models/movie'; // Assurez-vous d'avoir l'interface
+import { Movie, MediaType } from '../models/movie';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class MovieService {
+  private api = 'http://localhost:8080/api/movies';
 
-  private apiUrl = 'http://localhost:8080/api/movies';
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
-
-  // --- 1. RÉCUPÉRER TOUS LES FILMS ---
+  // ✅ EXISTANT — inchangé
   getAllMovies(): Observable<Movie[]> {
-    return this.http.get<Movie[]>(this.apiUrl);
+    return this.http.get<Movie[]>(this.api);
   }
 
-  // --- 2. RÉCUPÉRER UN FILM PAR ID ---
+  // 🆕 NOUVEAU — seulement les films
+  getOnlyMovies(): Observable<Movie[]> {
+    return this.http.get<Movie[]>(`${this.api}/films`);
+  }
+
+  // 🆕 NOUVEAU — seulement les séries
+  getOnlySeries(): Observable<Movie[]> {
+    return this.http.get<Movie[]>(`${this.api}/series`);
+  }
+
+  // ✅ EXISTANT — inchangé
   getMovieById(id: number): Observable<Movie> {
-    return this.http.get<Movie>(`${this.apiUrl}/${id}`);
+    return this.http.get<Movie>(`${this.api}/${id}`);
   }
 
-  getMoviesByCategory(categoryId: number): Observable<Movie[]> {
-  return this.http.get<Movie[]>(`${this.apiUrl}/category/${categoryId}`);
-}
-
-  // --- 3. AJOUTER UN FILM (Multipart FormData) ---
-  createMovie(movieDto: any, fileSource: File): Observable<Movie> {
+  // ✅ EXISTANT — inchangé
+  createMovie(data: any, file: File): Observable<Movie> {
     const formData = new FormData();
-
-    // DANS LE SERVICE
-    // On transforme le DTO en Blob JSON pour que Spring puisse le désérialiser
-    formData.append('movie', new Blob([JSON.stringify(movieDto)], { type: 'application/json' }));
-    formData.append('file', fileSource);
-
-    return this.http.post<Movie>(`${this.apiUrl}/add`, formData);
+    formData.append('movie', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    formData.append('file', file);
+    return this.http.post<Movie>(`${this.api}/add`, formData);
   }
 
-  // --- 4. METTRE À JOUR UN FILM ---
-  updateMovie(id: number, movieDto: Movie): Observable<Movie> {
-    return this.http.put<Movie>(`${this.apiUrl}/update/${id}`, movieDto);
+  // 🆕 NOUVEAU — créer une série (sans fichier vidéo)
+  createSeries(data: Partial<Movie>): Observable<Movie> {
+    return this.http.post<Movie>(`${this.api}/series/add`, data);
   }
 
-  // --- 5. SUPPRIMER UN FILM ---
+  // ✅ EXISTANT — inchangé
+  updateMovie(id: number, data: Partial<Movie>): Observable<Movie> {
+    return this.http.put<Movie>(`${this.api}/update/${id}`, data);
+  }
+
+  // ✅ EXISTANT — inchangé
   deleteMovie(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
+    return this.http.delete<void>(`${this.api}/delete/${id}`);
   }
 }

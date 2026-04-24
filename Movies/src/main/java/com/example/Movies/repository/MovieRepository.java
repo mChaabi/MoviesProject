@@ -1,18 +1,20 @@
 package com.example.Movies.repository;
 
 import com.example.Movies.entity.Movie;
+import com.example.Movies.entity.Movie.MediaType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
+// ✅ MODIFIÉ — Ajout des méthodes de filtre par type
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
-    // Cette méthode permettra de récupérer les films du plus récent au plus ancien
+
+    // Existant
     List<Movie> findAllByOrderByCreatedAtDesc();
-
-    // Pour afficher les films d'un auteur spécifique (profil)
-    List<Movie> findByAuthorId(Long authorId);
-
-    // Spring Data JPA générera la requête SQL automatiquement
     List<Movie> findByCategoryId(Long categoryId);
+
+    // 🆕 Nouveaux
+    List<Movie> findByTypeOrderByCreatedAtDesc(MediaType type);
+    List<Movie> findByCategoryIdAndType(Long categoryId, MediaType type);
 }

@@ -32,30 +32,37 @@ public class SecurityConfig implements WebMvcConfigurer {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // 1. Désactiver le CSRF pour permettre les tests Postman (POST, DELETE, etc.)
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Ressources statiques et consoles
+                        // 1. Ressources statiques et consoles
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        // Entités principales
+                        // 2. Entités principales (Films, Séries, Catégories)
                         .requestMatchers("/categories/**").permitAll()
-                        .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/movies/**").permitAll()
-                        .requestMatchers("/profiles/**").permitAll()
-                        .requestMatchers("/likes/**").permitAll()
-
-                        // --- AJOUT POUR LES TAGS ---
                         .requestMatchers("/tags/**").permitAll()
 
-                        // Interactions sociales
+                        // --- NOUVEAU : Séries et Épisodes ---
+                        .requestMatchers("/seasons/**").permitAll()
+                        .requestMatchers("/episodes/**").permitAll()
+
+                        // 3. Utilisateurs et Profils
+                        .requestMatchers("/users/**").permitAll()
+                        .requestMatchers("/profiles/**").permitAll()
+
+                        // --- NOUVEAU : Suivi de lecture et Watchlist ---
+                        .requestMatchers("/watchlist/**").permitAll()
+                        .requestMatchers("/watch-progress/**").permitAll()
+
+                        // 4. Interactions sociales
+                        .requestMatchers("/likes/**").permitAll()
                         .requestMatchers("/comments/**").permitAll()
                         .requestMatchers("/follows/**").permitAll()
 
-                        // Sécurité globale
+                        // 5. Sécurité globale
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().permitAll() // Actuellement tout est ouvert, attention en production !
                 )
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .sessionManagement(session -> session

@@ -1,128 +1,197 @@
 <div class="dashboard-container">
+
   <aside class="upload-section">
     <div class="glass-card">
-      <h3>🎬 Ajouter un Film</h3>
+      <h3>🎬 Ajouter un Contenu</h3>
+
+      <div class="type-toggle">
+        <button [class.active]="addingType() === 'MOVIE'" (click)="setAddingType('MOVIE')">
+          🎬 Film
+        </button>
+        <button [class.active]="addingType() === 'SERIES'" (click)="setAddingType('SERIES')">
+          📺 Série
+        </button>
+      </div>
+
       <form [formGroup]="movieForm" (ngSubmit)="onAddMovie()">
         <div class="input-group">
-          <label>Catégorie du film</label>
+          <label>Catégorie</label>
           <select formControlName="categoryId">
-            <option [ngValue]="null">Choisir une catégorie...</option>
+            <option [ngValue]="null" disabled selected>Choisir une catégorie...</option>
+            @if (categories().length > 0) {
             @for (cat of categories(); track cat.id) {
             <option [ngValue]="cat.id">{{ cat.name }}</option>
+            }
+            } @else {
+            <option disabled>Chargement des catégories...</option>
             }
           </select>
         </div>
 
         <div class="input-group">
           <label>Titre</label>
-          <input type="text" formControlName="title" placeholder="Nom du film...">
+          <input type="text" formControlName="title" placeholder="Nom du film / série...">
         </div>
 
         <div class="input-group">
           <label>Description</label>
-          <textarea formControlName="description" placeholder="De quoi parle le film ?"></textarea>
+          <textarea formControlName="description" placeholder="De quoi parle ce contenu ?"></textarea>
         </div>
+
+        <div class="input-row">
+          <div class="input-group">
+            <label>Année</label>
+            <input type="number" formControlName="releaseYear" placeholder="2024">
+          </div>
+          <div class="input-group">
+            <label>Note /10</label>
+            <input type="number" formControlName="rating" placeholder="8.5" step="0.1" min="0" max="10">
+          </div>
+        </div>
+
+        @if (addingType() === 'MOVIE') {
+        <div class="input-group">
+          <label>Durée (minutes)</label>
+          <input type="number" formControlName="durationMinutes" placeholder="120">
+        </div>
+        }
+
+        @if (addingType() === 'MOVIE') {
+        <div class="input-group">
+          <label>URL vidéo (YouTube, Vimeo...)</label>
+          <input type="text" formControlName="videoUrl" placeholder="https://youtu.be/... (optionnel si fichier)">
+        </div>
+
+        <div class="separator-ou">— OU —</div>
 
         <div class="input-group">
-          <label class="file-label" [class.file-selected]="selectedFile">
-            <div class="file-content">
-              <span>{{ selectedFile ? selectedFile.name : 'Choisir la vidéo (.mp4)' }}</span>
-              @if (selectedFile) {
-              <small class="file-size">
-                {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} Mo / 500 Mo
-              </small>
-              }
+          <label class="drag-drop-zone" [class.file-selected]="selectedFile" (dragover)="$event.preventDefault()"
+            (drop)="onFileDropped($event)">
+            <input #fileInput type="file" (change)="onFileSelected($event)" accept="video/*" hidden>
+            <div class="drag-drop-content">
+              <div class="folder-icon">📂</div>
+              <div class="text-content">
+                <span class="main-text">
+                  {{ selectedFile ? selectedFile.name : 'Glisser le fichier ici ou cliquer' }}
+                </span>
+                <span class="sub-text">
+                  @if (selectedFile) {
+                  {{ (selectedFile.size / 1024 / 1024).toFixed(2) }} Mo / 1 Go
+                  } @else {
+                  MP4, MKV — max 1 Go
+                  }
+                </span>
+              </div>
             </div>
-            <input type="file" (change)="onFileSelected($event)" accept="video/*" hidden>
           </label>
         </div>
+        }
 
-        <button type="submit" [disabled]="movieForm.invalid || !selectedFile || isLoading()" class="submit-btn">
+        @if (addingType() === 'SERIES') {
+        <div class="series-info-box">
+          📌 Les saisons et épisodes seront ajoutés après la création de la série.
+        </div>
+        }
+
+        <button type="submit" [disabled]="movieForm.invalid || isLoading()" (click)="triggerFileInput($event)"
+          class="submit-btn">
           @if (isLoading()) {
           <span class="loader">⏳</span> Envoi en cours...
           } @else {
-          <span>🚀 Partager la vidéo</span>
+          <span>🚀 {{ addingType() === 'MOVIE' ? 'Partager le film' : 'Créer la série' }}</span>
           }
         </button>
+
       </form>
     </div>
   </aside>
 
-  <main class="movies-grid">
-    @for (movie of movies(); track movie.id) {
-    <div class="movie-card">
-      <div class="video-container">
-        <video controls preload="metadata">
-          <source [src]="'http://localhost:8080' + movie.videoUrl" type="video/mp4">
-          Votre navigateur ne supporte pas la lecture de vidéos.
-        </video>
-      </div>
+  <main class="movies-section">
 
-      <div class="movie-info">
-        <h4>{{ movie.title }}</h4>
-        <p>{{ movie.description }}</p>
-        <div class="tags-container">
-          @for (tag of movie.tags; track tag.id) {
-          <span class="tag-badge">#{{ tag.label }}</span>
+    <div class="filter-tabs">
+      <button [class.active]="activeFilter() === 'ALL'" (click)="setFilter('ALL')">
+        Tout ({{ movies().length }})
+      </button>
+      <button [class.active]="activeFilter() === 'MOVIE'" (click)="setFilter('MOVIE')">
+        🎬 Films ({{ movies() | movieTypeCount:'MOVIE' }})
+      </button>
+      <button [class.active]="activeFilter() === 'SERIES'" (click)="setFilter('SERIES')">
+        📺 Séries ({{ movies() | movieTypeCount:'SERIES' }})
+      </button>
+    </div>
+    <div class="movies-grid">
+      @for (movie of filteredMovies(); track movie.id) {
+
+      <!-- Click navigue vers /watch/:id -->
+      <div class="movie-card" [class.is-series]="movie.type === 'SERIES'" (click)="goToWatch(movie)"
+        style="cursor:pointer">
+
+        <!-- POSTER / THUMBNAIL -->
+        <div class="card-poster">
+          <!-- Thumbnail YouTube si URL YouTube -->
+          @if (movie.videoUrl && isYoutube(movie.videoUrl)) {
+          <img [src]="getYoutubeThumbnail(movie.videoUrl)" [alt]="movie.title">
+          } @else if (movie.type === 'SERIES') {
+          <div class="poster-placeholder series">📺</div>
+          } @else {
+          <div class="poster-placeholder movie">🎬</div>
           }
-        </div>
 
-        <div class="author-block">
-          <div class="author-tag">
-            👤 {{ movie.authorEmail || movie.authorName || 'Anonyme' }}
+          <!-- OVERLAY AU HOVER -->
+          <div class="card-hover-overlay">
+            <div class="play-circle">▶</div>
+            <span class="hover-label">{{ movie.type === 'SERIES' ? 'Voir la série' : 'Regarder' }}</span>
           </div>
 
-          @if (movie.authorId !== currentUserId) {
-          <button class="follow-btn" [class.following]="isFollowing(movie.authorId!)"
-            (click)="onFollowToggle(movie.authorId!)">
-            {{ isFollowing(movie.authorId!) ? '✓ Abonné' : '+ Suivre' }}
+          <!-- Badge type -->
+          <div class="type-badge" [class.badge-series]="movie.type === 'SERIES'">
+            {{ movie.type === 'SERIES' ? '📺 Série' : '🎬 Film' }}
+          </div>
+
+          <!-- Note -->
+          @if (movie.rating) {
+          <div class="rating-badge">⭐ {{ movie.rating }}</div>
+          }
+
+          <!-- Bouton watchlist (stopPropagation pour pas naviguer) -->
+          <button class="watchlist-overlay-btn" [class.in-list]="isInWatchlist(movie.id!)"
+            (click)="$event.stopPropagation(); onWatchlistToggle(movie.id!)">
+            {{ isInWatchlist(movie.id!) ? '✅' : '+ Liste' }}
           </button>
-          }
         </div>
 
-        <div class="movie-footer">
-          <div class="actions-group">
-            <button class="like-btn" [class.liked]="getLikeInfo(movie.id!).isLiked" (click)="onLikeToggle(movie.id!)">
-              <span class="heart">{{ getLikeInfo(movie.id!).isLiked ? '❤️' : '🤍' }}</span>
-              <span class="count">{{ getLikeInfo(movie.id!).count }}</span>
-            </button>
-
-            <div class="comment-count-badge">
-              💬 {{ getComments(movie.id!).length }}
-            </div>
-          </div>
-        </div>
-
-        <hr class="separator">
-
-        <div class="comments-section">
-          <h5>Commentaires</h5>
-          <div class="comments-list">
-            @for (comment of getComments(movie.id!); track comment.id) {
-            <div class="comment-item">
-              <span class="comment-user">Utilisateur #{{ comment.userId }} :</span>
-              <span class="comment-content">{{ comment.content }}</span>
-            </div>
-            } @empty {
-            <p class="no-comments">Aucun commentaire pour le moment.</p>
+        <!-- INFO SOUS LE POSTER -->
+        <div class="card-info">
+          <h4>{{ movie.title }}</h4>
+          <div class="card-meta">
+            @if (movie.releaseYear) { <span>{{ movie.releaseYear }}</span> }
+            @if (movie.durationMinutes && movie.type === 'MOVIE') {
+            <span>{{ movie.durationMinutes }} min</span>
+            }
+            @if (movie.type === 'SERIES' && movie.totalSeasons) {
+            <span>{{ movie.totalSeasons }} saison(s)</span>
             }
           </div>
+          <p class="card-desc">{{ movie.description }}</p>
 
-          <div class="comment-form">
-            <input type="text" [(ngModel)]="newCommentText[movie.id!]" placeholder="Écrire un commentaire..."
-              (keyup.enter)="onAddComment(movie.id!)">
-            <button (click)="onAddComment(movie.id!)" [disabled]="!newCommentText[movie.id!]">
-              Envoyer
+          <!-- Actions like/comment -->
+          <div class="card-actions" (click)="$event.stopPropagation()">
+            <button class="like-btn" [class.liked]="getLikeInfo(movie.id!).isLiked" (click)="onLikeToggle(movie.id!)">
+              {{ getLikeInfo(movie.id!).isLiked ? '❤️' : '🤍' }} {{ getLikeInfo(movie.id!).count }}
             </button>
+            <span class="comment-count">💬 {{ getComments(movie.id!).length }}</span>
+            <span class="author">👤 {{ movie.authorEmail || movie.authorName || 'Anonyme' }}</span>
           </div>
         </div>
+
       </div>
+      } @empty {
+      <div class="empty-state">
+        <div class="empty-icon">🎥</div>
+        <p>Aucun contenu disponible. Soyez le premier à en ajouter !</p>
+      </div>
+      }
     </div>
-    } @empty {
-    <div class="empty-state">
-      <div class="empty-icon">🎥</div>
-      <p>Aucun film disponible. Soyez le premier à en ajouter !</p>
-    </div>
-    }
+
   </main>
 </div>

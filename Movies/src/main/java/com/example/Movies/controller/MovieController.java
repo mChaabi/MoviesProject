@@ -1,11 +1,11 @@
 package com.example.Movies.controller;
 
 import com.example.Movies.dto.MovieDTO;
+import com.example.Movies.dto.SeasonDTO;
+import com.example.Movies.entity.Movie.MediaType;
 import com.example.Movies.service.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,40 +13,68 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+// ✅ MODIFIÉ — Ajout des endpoints pour séries et filtres
 @RestController
 @RequestMapping("/movies")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200") // Indispensable pour Angular
+@CrossOrigin(origins = "http://localhost:4200")
 public class MovieController {
 
     private final MovieService movieService;
 
-    // --- 1. RÉCUPÉRER TOUS LES FILMS ---
+    // ✅ EXISTANT — GET tous les films ET séries
     @GetMapping
     public ResponseEntity<List<MovieDTO>> getAllMovies() {
         return ResponseEntity.ok(movieService.getAllMovies());
     }
 
-    // --- 2. RÉCUPÉRER UN FILM PAR ID ---
+    // 🆕 NOUVEAU — GET uniquement les films
+    @GetMapping("/films")
+    public ResponseEntity<List<MovieDTO>> getOnlyMovies() {
+        return ResponseEntity.ok(movieService.getByType(com.example.Movies.entity.Movie.MediaType.MOVIE));
+    }
+
+    // 🆕 NOUVEAU — GET uniquement les séries
+    @GetMapping("/series")
+    public ResponseEntity<List<MovieDTO>> getOnlySeries() {
+        return ResponseEntity.ok(movieService.getByType(com.example.Movies.entity.Movie.MediaType.SERIES));
+    }
+
+    // ✅ EXISTANT — GET par ID
     @GetMapping("/{id}")
     public ResponseEntity<MovieDTO> getMovieById(@PathVariable Long id) {
         return ResponseEntity.ok(movieService.getMovieById(id));
     }
 
-    @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    // 🆕 NOUVEAU — GET les saisons d'une série
+    @GetMapping("/{id}/seasons")
+    public ResponseEntity<List<SeasonDTO>> getSeasons(@PathVariable Long id) {
+        return ResponseEntity.ok(movieService.getSeasonsOfSeries(id));
+    }
+
+    // ✅ EXISTANT — POST ajouter un film (avec fichier vidéo)
+    @PostMapping(value = "/add", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MovieDTO> addMovie(
             @RequestPart("movie") MovieDTO dto,
             @RequestPart("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(movieService.createMovie(dto, file));
     }
 
-    // --- 4. METTRE À JOUR UN FILM ---
+    // 🆕 NOUVEAU — POST créer une série (sans vidéo directe)
+    @PostMapping("/series/add")
+    public ResponseEntity<MovieDTO> addSeries(@Valid @RequestBody MovieDTO dto) {
+        return ResponseEntity.ok(movieService.createSeries(dto));
+    }
+
+    // ✅ EXISTANT — PUT mettre à jour
     @PutMapping("/update/{id}")
-    public ResponseEntity<MovieDTO> updateMovie(@PathVariable Long id, @Valid @RequestBody MovieDTO movieDTO) {
+    public ResponseEntity<MovieDTO> updateMovie(
+            @PathVariable Long id,
+            @Valid @RequestBody MovieDTO movieDTO) {
         return ResponseEntity.ok(movieService.updateMovie(id, movieDTO));
     }
 
-    // --- 5. SUPPRIMER UN FILM ---
+    // ✅ EXISTANT — DELETE supprimer
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
         movieService.deleteMovie(id);

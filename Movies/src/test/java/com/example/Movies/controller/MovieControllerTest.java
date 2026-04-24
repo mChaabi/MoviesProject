@@ -39,9 +39,15 @@ class MovieControllerTest {
 
     @BeforeEach
     void setUp() {
-        movieDTO = new MovieDTO(1L, "Inception", "http://video.com", "Sci-fi", 1L, "Auteur");
+        movieDTO = MovieDTO.builder()
+                .id(1L)
+                .title("Inception")
+                .videoUrl("http://video.com")
+                .description("Sci-fi")
+                .authorId(1L)
+                .authorName("Auteur")
+                .build(); // Pas besoin de mettre les 12 autres champs, ils seront null par défaut
     }
-
     @Test
     void getAllMovies_ShouldReturnList() throws Exception {
         when(movieService.getAllMovies()).thenReturn(List.of(movieDTO));

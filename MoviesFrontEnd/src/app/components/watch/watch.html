@@ -1,0 +1,65 @@
+<div class="watch-container">
+  @if (movie(); as m) {
+
+    <!-- PLAYER -->
+    <div class="player-section">
+      @if (m.videoUrl && isYoutube(m.videoUrl)) {
+        <iframe [src]="safeUrl(m.videoUrl)"
+                frameborder="0" allowfullscreen allow="autoplay"
+                class="main-player">
+        </iframe>
+      } @else if (m.videoUrl) {
+        <video controls autoplay class="main-player">
+          <source [src]="m.videoUrl.startsWith('http') ? m.videoUrl : 'http://localhost:8080' + m.videoUrl"
+                  type="video/mp4">
+        </video>
+      }
+    </div>
+
+    <!-- INFOS -->
+    <div class="movie-details">
+      <div class="details-header">
+        <div>
+          <h1>{{ m.title }}</h1>
+          <div class="meta-row">
+            @if (m.rating) { <span class="rating">⭐ {{ m.rating }}/10</span> }
+            @if (m.releaseYear) { <span>{{ m.releaseYear }}</span> }
+            @if (m.durationMinutes) { <span>{{ m.durationMinutes }} min</span> }
+            @if (m.categoryName) { <span class="category">{{ m.categoryName }}</span> }
+          </div>
+          <p class="description">{{ m.description }}</p>
+        </div>
+
+        <div class="actions">
+          <button class="like-btn" [class.liked]="likeInfo().isLiked" (click)="onLike()">
+            {{ likeInfo().isLiked ? '❤️' : '🤍' }} {{ likeInfo().count }}
+          </button>
+          <a routerLink="/" class="back-btn">← Retour</a>
+        </div>
+      </div>
+
+      <!-- COMMENTAIRES -->
+      <div class="comments-section">
+        <h3>💬 Commentaires ({{ comments().length }})</h3>
+        <div class="comment-input">
+          <input [(ngModel)]="newComment" placeholder="Écrire un commentaire..."
+                 (keyup.enter)="onAddComment()">
+          <button (click)="onAddComment()" [disabled]="!newComment">Envoyer</button>
+        </div>
+        <div class="comments-list">
+          @for (c of comments(); track c.id) {
+            <div class="comment-item">
+              <span class="comment-user">👤 Utilisateur #{{ c.userId }}</span>
+              <p>{{ c.content }}</p>
+            </div>
+          } @empty {
+            <p class="no-comments">Aucun commentaire.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+  } @else {
+    <div class="loading">Chargement...</div>
+  }
+</div>

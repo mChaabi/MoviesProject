@@ -2,54 +2,65 @@ package com.example.Movies.mapper;
 
 import com.example.Movies.dto.MovieDTO;
 import com.example.Movies.entity.Movie;
+import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList; // À ajouter
-import java.util.List;      // À ajouter
-import java.util.stream.Collectors; // Optionnel (pour les streams)
+import java.util.List;
 
+
+
+@Builder
+// ✅ MODIFIÉ — Ajout des nouveaux champs type, rating, releaseYear, durationMinutes, seasons
 @Component
+@RequiredArgsConstructor
 public class MovieMapper {
 
+    private final SeasonMapper seasonMapper;
+
     public MovieDTO toDTO(Movie movie) {
-        if (movie == null) {
-            return null;
-        }
+        if (movie == null) return null;
 
-        return new MovieDTO(
-                movie.getId(),
-                movie.getTitle(),
-                movie.getVideoUrl(),
-                movie.getDescription(),
-                movie.getAuthor() != null ? movie.getAuthor().getId() : null,
-                movie.getAuthor() != null ? movie.getAuthor().getEmail() : "Auteur inconnu"
-        );
+        return MovieDTO.builder()
+                .id(movie.getId())
+                .title(movie.getTitle())
+                .videoUrl(movie.getVideoUrl())
+                .description(movie.getDescription())
+                .authorId(movie.getAuthor() != null ? movie.getAuthor().getId() : null)
+                .authorName(movie.getAuthor() != null ? movie.getAuthor().getName() : null)
+                .authorEmail(movie.getAuthor() != null ? movie.getAuthor().getEmail() : null)
+                .categoryId(movie.getCategory() != null ? movie.getCategory().getId() : null)
+                .categoryName(movie.getCategory() != null ? movie.getCategory().getName() : null)
+                .type(movie.getType())
+                .rating(movie.getRating())
+                .releaseYear(movie.getReleaseYear())
+                .durationMinutes(movie.getDurationMinutes())
+
+                // 1. Pour la liste
+                .seasons(movie.getSeasons() != null && movie.getType() == Movie.MediaType.SERIES
+                        ? movie.getSeasons().stream().map(seasonMapper::toDTO).toList()
+                        : null)
+
+                // 2. Pour le compteur (CHANGEZ 'seasons' par le nom correct de votre champ dans MovieDTO, par ex: episodesCount)
+                .episodesCount(movie.getSeasons() != null ? movie.getSeasons().size() : 0)
+
+                .build();
     }
-
-    // --- NOUVELLE MÉTHODE ---
-    public List<MovieDTO> toDtoList(List<Movie> movies) {
-        if (movies == null) {
-            return new ArrayList<>();
-        }
-
-        // Version propre avec Stream (plus moderne)
-        return movies.stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
-    // ------------------------
 
     public Movie toEntity(MovieDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-
         Movie movie = new Movie();
-        movie.setId(dto.id());
         movie.setTitle(dto.title());
-        movie.setVideoUrl(dto.videoUrl());
         movie.setDescription(dto.description());
-
+        movie.setVideoUrl(dto.videoUrl());
+        // 🆕 Nouveaux champs
+        if (dto.type() != null) movie.setType(dto.type());
+        if (dto.rating() != null) movie.setRating(dto.rating());
+        if (dto.releaseYear() != null) movie.setReleaseYear(dto.releaseYear());
+        if (dto.durationMinutes() != null) movie.setDurationMinutes(dto.durationMinutes());
         return movie;
+    }
+
+    public List<MovieDTO> toDtoList(List<Movie> movies) {
+        return movies.stream().map(this::toDTO).toList();
     }
 }

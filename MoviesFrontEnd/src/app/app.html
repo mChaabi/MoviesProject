@@ -2,10 +2,11 @@
   <div class="logo" routerLink="/">Movies<span>Hub</span></div>
 
   <div class="nav-actions">
-    <a routerLink="/register" routerLinkActive="active-link">Inscription</a>
-    <a routerLink="/profile" routerLinkActive="active-link">Mon Profil</a>
+    <a routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">Explorer</a>
+    <a routerLink="/watchlist" routerLinkActive="active-link">Ma Liste</a>
     <a routerLink="/categories" routerLinkActive="active-link">Catégories</a>
-    <a routerLink="/movies" routerLinkActive="active-link">Explorer</a>
+    <a routerLink="/profile" routerLinkActive="active-link">Watch</a>
+    <a routerLink="/register" class="btn-register">Inscription</a>
   </div>
 </nav>
 
@@ -14,5 +15,5 @@
 </main>
 
 <footer class="main-footer">
-  <p>&copy; 2026 Movies App - Tous droits réservés</p>
+  <p>&copy; 2026 MoviesHub - Votre plateforme de streaming personnelle</p>
 </footer>

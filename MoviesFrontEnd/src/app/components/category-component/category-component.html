@@ -1,65 +1,158 @@
+<!-- category-component.html -->
 <div class="category-container">
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
   <aside class="sidebar">
-    <h3>Gestion des Catégories</h3>
 
-    <div class="add-cat-card">
-      <div class="input-group">
-        <label>Nom</label>
-        <input type="text" [(ngModel)]="newCategoryName" placeholder="Ex: Action, Drame...">
-      </div>
+    <!-- Titre + Stats -->
+    <div class="sidebar-top">
+      <h3>Catégories</h3>
+      <span class="total-badge">{{ movies().length }} contenus</span>
+    </div>
 
-      <div class="input-group">
-        <label>Description</label>
-        <textarea [(ngModel)]="newCategoryDescription" placeholder="Description courte..." rows="2"></textarea>
-      </div>
-
-      <button (click)="onAddCategory()" class="btn-submit" [disabled]="!newCategoryName()">
-        Ajouter la catégorie
+    <!-- Formulaire ajout -->
+    <div class="add-form">
+      <input
+        [(ngModel)]="newCategoryName"
+        placeholder="Nouvelle catégorie..."
+        (keyup.enter)="onAddCategory()">
+      <textarea
+        [(ngModel)]="newCategoryDescription"
+        placeholder="Description (optionnel)"
+        rows="2">
+      </textarea>
+      <button class="btn-add" (click)="onAddCategory()" [disabled]="!newCategoryName()">
+        + Ajouter
       </button>
     </div>
 
-    <hr>
+    <div class="divider"></div>
 
+    <!-- Liste catégories -->
     <ul class="cat-list">
-      <li [class.active]="selectedCategoryId() === null" (click)="onSelectCategory(null)">
-        <span class="cat-name">Tous les films</span>
-        <span class="count">{{ movies().length }}</span>
+
+      <!-- Tout -->
+      <li [class.active]="selectedCategoryId() === null"
+          (click)="onSelectCategory(null)">
+        <div class="cat-left">
+          <span class="cat-icon">🎬</span>
+          <div>
+            <span class="cat-name">Tout le catalogue</span>
+          </div>
+        </div>
+        <span class="cat-count">{{ movies().length }}</span>
       </li>
 
-      @for (cat of categories(); track $index ) {
-        <li [class.active]="selectedCategoryId() === cat.id">
-          <div class="cat-info" (click)="onSelectCategory(cat.id!)">
-            <span class="cat-name">{{ cat.name }}</span>
-            <small class="cat-desc" *ngIf="cat.description">{{ cat.description }}</small>
+      <!-- Catégories -->
+      @for (cat of categories(); track cat.id) {
+        <li [class.active]="selectedCategoryId() === cat.id"
+            (click)="onSelectCategory(cat.id!)">
+          <div class="cat-left">
+            <span class="cat-icon">{{ getCategoryIcon(cat.name) }}</span>
+            <div>
+              <span class="cat-name">{{ cat.name }}</span>
+              @if (cat.description) {
+                <small class="cat-desc">{{ cat.description }}</small>
+              }
+            </div>
           </div>
-          <button class="btn-del" (click)="onDeleteCategory(cat.id!)" title="Supprimer">×</button>
+          <div class="cat-right">
+            <span class="cat-count">{{ getCountByCategory(cat.id!) }}</span>
+            <button class="btn-del" (click)="$event.stopPropagation(); onDeleteCategory(cat.id!)">×</button>
+          </div>
         </li>
       }
+
     </ul>
   </aside>
 
-  <main class="movie-grid">
-    <header class="grid-header">
-      <h2>Films : {{ selectedCategoryId() ? 'Filtre par catégorie' : 'Tous les films' }}</h2>
-      <p class="stats">{{ filteredMovies().length }} film(s) trouvé(s)</p>
-    </header>
+  <!-- ══════════════ CONTENU PRINCIPAL ══════════════ -->
+  <main class="main-content">
 
-    <div class="grid">
-      @for (movie of filteredMovies(); track movie.id) {
-        <div class="movie-card">
-          <div class="video-preview">
-            <span class="play-icon">▶</span>
+    <!-- Header -->
+    <div class="content-header">
+      <div>
+        <h2>
+          @if (selectedCategoryId()) {
+            {{ getSelectedCategoryName() }}
+          } @else {
+            Tout le catalogue
+          }
+        </h2>
+        <p class="content-stats">
+          {{ filteredMovies().length }} contenu(s) —
+          {{ filteredMovies() | movieTypeCountCat:'MOVIE' }} film(s),
+          {{ filteredMovies() | movieTypeCountCat:'SERIES' }} série(s)
+        </p>
+      </div>
+
+      <!-- Filtre Type -->
+      <div class="type-filter">
+        <button [class.active]="typeFilter() === 'ALL'" (click)="typeFilter.set('ALL')">Tout</button>
+        <button [class.active]="typeFilter() === 'MOVIE'" (click)="typeFilter.set('MOVIE')">🎬 Films</button>
+        <button [class.active]="typeFilter() === 'SERIES'" (click)="typeFilter.set('SERIES')">📺 Séries</button>
+      </div>
+    </div>
+
+    <!-- Grille de cards -->
+    <div class="movies-grid">
+      @for (movie of displayedMovies(); track movie.id) {
+
+        <div class="movie-card" (click)="goToMovie(movie)">
+
+          <!-- POSTER -->
+          <div class="card-poster">
+
+            @if (getThumbnail(movie)) {
+              <img [src]="getThumbnail(movie)!" [alt]="movie.title">
+            } @else if (movie.type === 'SERIES') {
+              <div class="poster-placeholder">📺</div>
+            } @else {
+              <div class="poster-placeholder">🎬</div>
+            }
+
+            <!-- Overlay hover -->
+            <div class="hover-overlay">
+              <div class="play-btn">▶</div>
+              <span class="play-label">{{ movie.type === 'SERIES' ? 'Voir la série' : 'Regarder' }}</span>
+            </div>
+
+            <!-- Badges -->
+            <span class="badge-type" [class.series]="movie.type === 'SERIES'">
+              {{ movie.type === 'SERIES' ? 'Série' : 'Film' }}
+            </span>
+
+            @if (movie.rating) {
+              <span class="badge-rating">⭐ {{ movie.rating }}</span>
+            }
+
           </div>
-          <div class="card-content">
+
+          <!-- Infos -->
+          <div class="card-info">
             <h4>{{ movie.title }}</h4>
-            <p>{{ movie.description }}</p>
+            <div class="card-meta">
+              @if (movie.releaseYear) { <span>{{ movie.releaseYear }}</span> }
+              @if (movie.durationMinutes && movie.type === 'MOVIE') {
+                <span>{{ movie.durationMinutes }} min</span>
+              }
+            </div>
+            <!-- Catégorie badge sous le titre -->
+            @if (!selectedCategoryId() && movie.categoryName) {
+              <span class="cat-tag">{{ getCategoryIcon(movie.categoryName) }} {{ movie.categoryName }}</span>
+            }
           </div>
+
         </div>
+
       } @empty {
         <div class="empty-state">
-          <p>Aucun film n'est encore associé à cette catégorie.</p>
+          <div class="empty-icon">🎬</div>
+          <h3>Aucun contenu</h3>
+          <p>Aucun film ou série dans cette catégorie.</p>
         </div>
       }
     </div>
+
   </main>
 </div>

@@ -1,7 +1,7 @@
 package com.example.Movies.mapper;
 
-import com.example.Movies.dto.ProfileDTO;
 import com.example.Movies.entity.Profile;
+import com.example.Movies.dto.ProfileDTO;
 import com.example.Movies.entity.User;
 import org.springframework.stereotype.Component;
 

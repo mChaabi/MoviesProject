@@ -28,6 +28,6 @@ public class Tag {
     @Column(unique = true, nullable = false)
     private String label;
 
-    @ManyToMany(mappedBy = "tags") // Référence au champ 'tags' dans l'entité Movie
+    @ManyToMany(mappedBy = "tags") // <-- Doit être identique au nom du champ dans Movie
     private Set<Movie> movies = new HashSet<>();
 }

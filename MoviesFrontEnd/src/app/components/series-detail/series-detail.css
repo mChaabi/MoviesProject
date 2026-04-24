@@ -1,0 +1,203 @@
+/* 🆕 NOUVEAU — src/app/components/series-detail/series-detail-component.css */
+
+.series-detail-container {
+  min-height: 100vh;
+  background: #0e1117;
+  color: #e2e8f0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ── HEADER ── */
+.series-header {
+  background: linear-gradient(135deg, #1a1f2e, #0f1623);
+  border-bottom: 1px solid #2d3748;
+  padding: 2rem 3rem;
+}
+.back-btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  color: #64748b; text-decoration: none; font-size: .85rem;
+  margin-bottom: 1rem; transition: color .2s;
+}
+.back-btn:hover { color: #e2e8f0; }
+.series-badge {
+  display: inline-block; padding: .2rem .6rem; border-radius: 12px;
+  background: rgba(61,142,240,.15); color: #3d8ef0;
+  font-size: .75rem; font-weight: 600; margin-bottom: .5rem;
+}
+.series-header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: .5rem; }
+.series-meta {
+  display: flex; gap: 1.2rem; flex-wrap: wrap;
+  font-size: .85rem; color: #64748b; margin-bottom: .8rem;
+}
+.rating { color: #f59e0b; }
+.series-description { color: #94a3b8; line-height: 1.6; max-width: 600px; }
+
+/* ── LAYOUT ── */
+.series-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr 340px;
+  gap: 0;
+  min-height: calc(100vh - 180px);
+}
+
+/* ── PANEL SAISONS ── */
+.seasons-panel {
+  background: #131923; border-right: 1px solid #1e293b;
+  padding: 1.5rem 1rem;
+}
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.panel-header h3 { font-size: .95rem; font-weight: 600; }
+.btn-add-small {
+  padding: .3rem .7rem; border-radius: 6px; border: 1px solid #2d3748;
+  background: transparent; color: #64748b; font-size: .75rem; cursor: pointer;
+  transition: all .2s;
+}
+.btn-add-small:hover { border-color: #3d8ef0; color: #3d8ef0; }
+
+.mini-form {
+  display: flex; flex-direction: column; gap: .5rem;
+  background: #1a2035; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;
+}
+.mini-form input, .mini-form textarea {
+  background: #0e1117; border: 1px solid #2d3748; border-radius: 6px;
+  padding: .5rem .7rem; color: #e2e8f0; font-size: .82rem; outline: none;
+}
+.mini-form input:focus, .mini-form textarea:focus { border-color: #3d8ef0; }
+.btn-submit-mini {
+  padding: .5rem; background: #3d8ef0; color: white; border: none;
+  border-radius: 6px; font-weight: 600; font-size: .82rem; cursor: pointer;
+}
+
+.seasons-list { list-style: none; display: flex; flex-direction: column; gap: .3rem; }
+.seasons-list li {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .7rem; border-radius: 8px; cursor: pointer;
+  border: 1px solid transparent; transition: all .2s;
+}
+.seasons-list li:hover { background: rgba(255,255,255,.03); border-color: #2d3748; }
+.seasons-list li.active { background: rgba(61,142,240,.1); border-color: rgba(61,142,240,.3); }
+.season-info { display: flex; align-items: center; gap: .7rem; flex: 1; }
+.season-num {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(61,142,240,.15); color: #3d8ef0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .8rem; flex-shrink: 0;
+}
+.season-text strong { font-size: .82rem; display: block; }
+.season-text small { font-size: .72rem; color: #64748b; }
+.btn-del-small {
+  width: 24px; height: 24px; border-radius: 4px; border: none;
+  background: rgba(239,68,68,.1); color: #ef4444;
+  font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .2s;
+}
+.seasons-list li:hover .btn-del-small { opacity: 1; }
+.empty-seasons { color: #475569; font-size: .82rem; text-align: center; padding: 1rem 0; }
+
+/* ── PANEL ÉPISODES ── */
+.episodes-panel {
+  background: #0f1623; border-right: 1px solid #1e293b; padding: 1.5rem;
+  overflow-y: auto;
+}
+.episodes-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.2rem;
+}
+.episodes-header h3 { font-size: 1rem; font-weight: 600; }
+
+.add-episode-form {
+  background: #131923; border: 1px solid #1e293b; border-radius: 10px;
+  padding: 1.2rem; margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: .7rem;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.form-field { display: flex; flex-direction: column; gap: .3rem; }
+.form-field label { font-size: .72rem; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
+.form-field input, .form-field textarea {
+  background: #0e1117; border: 1px solid #2d3748; border-radius: 6px;
+  padding: .5rem .7rem; color: #e2e8f0; font-size: .85rem; outline: none;
+}
+.form-field input:focus { border-color: #3d8ef0; }
+.file-label {
+  display: block; padding: .7rem 1rem; border: 2px dashed #2d3748;
+  border-radius: 8px; cursor: pointer; text-align: center;
+  color: #64748b; font-size: .82rem; transition: border-color .2s;
+}
+.file-label:hover, .file-label.file-selected { border-color: #3d8ef0; color: #3d8ef0; }
+.btn-submit-episode {
+  padding: .65rem; background: #e8b84b; color: #000; border: none;
+  border-radius: 8px; font-weight: 700; cursor: pointer; font-size: .9rem;
+}
+.btn-submit-episode:disabled { opacity: .5; cursor: not-allowed; }
+
+.episodes-list { display: flex; flex-direction: column; gap: .7rem; }
+.episode-card {
+  display: flex; align-items: flex-start; gap: 1rem;
+  background: #131923; border: 1px solid #1e293b; border-radius: 10px;
+  padding: 1rem; transition: all .2s;
+}
+.episode-card:hover { border-color: #2d3748; }
+.episode-card.playing { border-color: #e8b84b; background: rgba(232,184,75,.05); }
+.episode-num {
+  width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+  background: rgba(100,116,139,.1); color: #64748b;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .78rem; font-weight: 700;
+}
+.episode-card.playing .episode-num { background: rgba(232,184,75,.15); color: #e8b84b; }
+.episode-info { flex: 1; min-width: 0; }
+.episode-info h4 { font-size: .9rem; font-weight: 600; margin-bottom: .2rem; }
+.episode-info p { font-size: .78rem; color: #64748b; margin-bottom: .4rem; }
+.episode-meta { display: flex; gap: .8rem; font-size: .75rem; color: #64748b; }
+.progress-text { color: #22d3a0; }
+.ep-progress-bar {
+  height: 3px; background: #1e293b; border-radius: 2px; margin-top: .5rem;
+}
+.ep-progress-fill { height: 100%; border-radius: 2px; background: #22d3a0; transition: width .3s; }
+.episode-actions { display: flex; flex-direction: column; gap: .4rem; flex-shrink: 0; }
+.play-btn {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e8b84b;
+  background: rgba(232,184,75,.1); color: #e8b84b; cursor: pointer;
+  font-size: 1rem; display: flex; align-items: center; justify-content: center;
+  transition: background .2s;
+}
+.play-btn:hover { background: rgba(232,184,75,.2); }
+.del-btn {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid #2d3748;
+  background: transparent; color: #64748b; cursor: pointer; font-size: .9rem;
+  display: flex; align-items: center; justify-content: center; transition: all .2s;
+}
+.del-btn:hover { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,.05); }
+
+.empty-episodes {
+  text-align: center; padding: 3rem; color: #475569; font-size: .9rem;
+}
+.select-season-hint {
+  display: flex; align-items: center; justify-content: center;
+  height: 300px; color: #475569; font-size: .95rem;
+}
+
+/* ── PLAYER ── */
+.player-panel {
+  background: #0a0f1a; padding: 1.5rem; display: flex; flex-direction: column;
+}
+.player-wrapper { display: flex; flex-direction: column; gap: 1rem; }
+.player-header { }
+.now-playing {
+  font-size: .72rem; color: #e8b84b; text-transform: uppercase;
+  letter-spacing: .06em; display: block; margin-bottom: .3rem;
+}
+.player-header h4 { font-size: 1rem; font-weight: 600; }
+.player-header small { color: #64748b; font-size: .8rem; }
+.episode-video {
+  width: 100%; border-radius: 10px; background: #000;
+  border: 1px solid #1e293b; margin-top: 1rem;
+}
+.player-placeholder {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 1rem; color: #475569;
+}
+.placeholder-icon { font-size: 3.5rem; opacity: .4; }
+.loading { color: #64748b; text-align: center; padding: 2rem; font-size: .9rem; }

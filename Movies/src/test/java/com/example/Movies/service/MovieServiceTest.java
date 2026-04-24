@@ -52,8 +52,14 @@ class MovieServiceTest {
         movie.setTitle("Inception");
         movie.setAuthor(user);
 
-        // Rappel : MovieDTO est un Record
-        movieDTO = new MovieDTO(10L, "Inception", "url_video", "Description", 1L, "test@example.com");
+        movieDTO = MovieDTO.builder()
+                .id(1L)
+                .title("Inception")
+                .videoUrl("http://video.com")
+                .description("Sci-fi")
+                .authorId(1L)
+                .authorName("Auteur")
+                .build(); // Pas besoin de mettre les 12 autres champs, ils seront null par défaut
     }
 
     @Test
