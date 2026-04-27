@@ -3,22 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User } from '../models/user';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class UserService {
-  // L'URL contient /api car tu as mis server.servlet.context-path=/api
-  private apiUrl = 'http://localhost:8080/api/users';
+  private api = 'http://localhost:8080/api/users';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  // Appelle GET /api/users
-  getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.apiUrl);
+  // Login — envoie email + password, reçoit UserResponse avec le role
+  login(credentials: { email: string; password: string }): Observable<User> {
+    return this.http.post<User>(`${this.api}/login`, credentials);
   }
 
-  // Appelle POST /api/users/add
-  register(user: User): Observable<User> {
-    return this.http.post<User>(`${this.apiUrl}/add`, user);
+  register(data: { name: string; email: string; password: string }): Observable<User> {
+    return this.http.post<User>(`${this.api}/register`, data);
   }
 }

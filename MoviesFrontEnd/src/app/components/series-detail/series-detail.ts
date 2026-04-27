@@ -10,6 +10,7 @@ import { WatchProgressService } from '../../services/watch-progress';
 import { Season } from '../../models/season';
 import { Episode } from '../../models/episode';
 import { Movie } from '../../models/movie';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 
 @Component({
@@ -26,6 +27,7 @@ export class SeriesDetailComponent implements OnInit {
   private episodeService = inject(EpisodeService);
   private watchProgressService = inject(WatchProgressService);
   private fb = inject(FormBuilder);
+  private sanitizer = inject(DomSanitizer);
 
   currentUserId = 1;
   seriesId!: number;
@@ -56,6 +58,74 @@ export class SeriesDetailComponent implements OnInit {
     description: [''],
     durationMinutes: [null]
   });
+
+
+  // Détecte le type de source
+getVideoType(url: string | undefined): 'youtube' | 'dailymotion' | 'vimeo' | 'mp4' | 'unknown' {
+  if (!url) return 'unknown';
+  if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+  if (url.includes('dailymotion.com') || url.includes('dai.ly')) return 'dailymotion';
+  if (url.includes('vimeo.com')) return 'vimeo';
+  if (url.endsWith('.mp4') || url.includes('/uploads/')) return 'mp4';
+  return 'unknown';
+}
+
+
+// Génère l'URL embed selon la source
+safeEpisodeUrl(url: string | undefined): SafeHtml {
+  if (!url) return this.sanitizer.bypassSecurityTrustResourceUrl('');
+
+  const type = this.getVideoType(url);
+
+  if (type === 'youtube') {
+    let videoId = '';
+    if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1].split('?')[0];
+    } else if (url.includes('v=')) {
+      videoId = url.split('v=')[1].split('&')[0];
+    }
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.youtube.com/embed/${videoId}?autoplay=1`
+    );
+  }
+
+  if (type === 'dailymotion') {
+    // https://www.dailymotion.com/video/x81myot → x81myot
+    let videoId = '';
+    if (url.includes('/video/')) {
+      videoId = url.split('/video/')[1].split('?')[0].split('_')[0];
+    } else if (url.includes('dai.ly/')) {
+      videoId = url.split('dai.ly/')[1].split('?')[0];
+    }
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.dailymotion.com/embed/video/${videoId}?autoplay=1`
+    );
+  }
+
+  if (type === 'vimeo') {
+    // https://vimeo.com/123456789 → 123456789
+    const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://player.vimeo.com/video/${videoId}?autoplay=1`
+    );
+  }
+
+  // MP4 ou autre — pas d'embed, retourne l'URL directe
+  return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+}
+
+// Vérifie si c'est un embed (iframe) ou une vidéo directe (<video>)
+isEmbed(url: string | undefined): boolean {
+  const type = this.getVideoType(url);
+  return type === 'youtube' || type === 'dailymotion' || type === 'vimeo';
+}
+
+// URL directe pour les fichiers MP4
+getDirectVideoUrl(url: string): string {
+  if (url.startsWith('http')) return url;
+  return 'http://localhost:8080' + url;
+}
+
 
   ngOnInit() {
     this.seriesId = Number(this.route.snapshot.paramMap.get('id'));

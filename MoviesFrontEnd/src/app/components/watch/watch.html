@@ -8,33 +8,57 @@
                 frameborder="0" allowfullscreen allow="autoplay"
                 class="main-player">
         </iframe>
+      } @else if (m.videoUrl && isDailymotion(m.videoUrl)) {
+        <iframe [src]="safeDailymotionUrl(m.videoUrl)"
+                frameborder="0" allowfullscreen allow="autoplay"
+                class="main-player">
+        </iframe>
       } @else if (m.videoUrl) {
-        <video controls autoplay class="main-player">
-          <source [src]="m.videoUrl.startsWith('http') ? m.videoUrl : 'http://localhost:8080' + m.videoUrl"
-                  type="video/mp4">
+        <video controls class="main-player" #videoPlayer
+               (error)="onVideoError($event)">
+          <source [src]="getVideoUrl(m.videoUrl)" type="video/mp4">
+          Votre navigateur ne supporte pas la lecture vidéo.
         </video>
+      } @else {
+        <div class="no-video">
+          <div class="no-video-icon">🎬</div>
+          <p>Aucune vidéo disponible</p>
+        </div>
       }
     </div>
 
     <!-- INFOS -->
     <div class="movie-details">
       <div class="details-header">
-        <div>
-          <h1>{{ m.title }}</h1>
-          <div class="meta-row">
-            @if (m.rating) { <span class="rating">⭐ {{ m.rating }}/10</span> }
-            @if (m.releaseYear) { <span>{{ m.releaseYear }}</span> }
-            @if (m.durationMinutes) { <span>{{ m.durationMinutes }} min</span> }
-            @if (m.categoryName) { <span class="category">{{ m.categoryName }}</span> }
+        <div class="movie-main-info">
+          <!-- Cover image si disponible -->
+          @if (m.coverUrl) {
+            <img [src]="m.coverUrl" [alt]="m.title" class="cover-img"
+                 (error)="onCoverError($event)">
+          }
+          <div class="movie-text">
+            <h1>{{ m.title }}</h1>
+            <div class="meta-row">
+              @if (m.rating) { <span class="rating">⭐ {{ m.rating }}/10</span> }
+              @if (m.releaseYear) { <span>{{ m.releaseYear }}</span> }
+              @if (m.durationMinutes) { <span>⏱ {{ m.durationMinutes }} min</span> }
+              @if (m.categoryName) { <span class="category">{{ m.categoryName }}</span> }
+              <span class="type-tag" [class.series]="m.type === 'SERIES'">
+                {{ m.type === 'SERIES' ? '📺 Série' : '🎬 Film' }}
+              </span>
+            </div>
+            <p class="description">{{ m.description }}</p>
+            <div class="author-info">
+              👤 Partagé par {{ m.authorEmail || m.authorName || 'Anonyme' }}
+            </div>
           </div>
-          <p class="description">{{ m.description }}</p>
         </div>
 
         <div class="actions">
           <button class="like-btn" [class.liked]="likeInfo().isLiked" (click)="onLike()">
             {{ likeInfo().isLiked ? '❤️' : '🤍' }} {{ likeInfo().count }}
           </button>
-          <a routerLink="/" class="back-btn">← Retour</a>
+          <a routerLink="/explorer" class="back-btn">← Retour</a>
         </div>
       </div>
 
@@ -42,7 +66,8 @@
       <div class="comments-section">
         <h3>💬 Commentaires ({{ comments().length }})</h3>
         <div class="comment-input">
-          <input [(ngModel)]="newComment" placeholder="Écrire un commentaire..."
+          <input [(ngModel)]="newComment"
+                 placeholder="Écrire un commentaire..."
                  (keyup.enter)="onAddComment()">
           <button (click)="onAddComment()" [disabled]="!newComment">Envoyer</button>
         </div>
@@ -53,13 +78,16 @@
               <p>{{ c.content }}</p>
             </div>
           } @empty {
-            <p class="no-comments">Aucun commentaire.</p>
+            <p class="no-comments">Aucun commentaire. Soyez le premier !</p>
           }
         </div>
       </div>
     </div>
 
   } @else {
-    <div class="loading">Chargement...</div>
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Chargement du film...</p>
+    </div>
   }
 </div>

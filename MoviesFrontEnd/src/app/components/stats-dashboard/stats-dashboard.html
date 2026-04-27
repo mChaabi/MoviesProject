@@ -1,0 +1,207 @@
+<div class="stats-container">
+
+  <div class="stats-header">
+    <div>
+      <h1>📊 Tableau de bord</h1>
+      <p class="stats-subtitle">Vue globale · {{ today }}</p>
+    </div>
+    <a routerLink="/explorer" class="btn-add">+ Ajouter du contenu</a>
+  </div>
+
+  @if (isLoading()) {
+  <div class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des statistiques...</p>
+  </div>
+  } @else {
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-icon blue">🎬</div>
+        <div>
+          <div class="kpi-label">Films</div>
+          <div class="kpi-value">{{ totalMovies() }}</div>
+        </div>
+      </div>
+      <div class="kpi-trend up">+{{ recentMovies() }} cette semaine</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-icon purple">📺</div>
+        <div>
+          <div class="kpi-label">Séries</div>
+          <div class="kpi-value">{{ totalSeries() }}</div>
+        </div>
+      </div>
+      <div class="kpi-trend up">{{ totalSeasons() }} saisons au total</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-icon gold">⭐</div>
+        <div>
+          <div class="kpi-label">Note moyenne</div>
+          <div class="kpi-value">{{ avgRating() }}<span class="kpi-unit">/10</span></div>
+        </div>
+      </div>
+      <div class="kpi-trend neutral">{{ ratedCount() }} contenus notés</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-left">
+        <div class="kpi-icon green">📁</div>
+        <div>
+          <div class="kpi-label">Total contenus</div>
+          <div class="kpi-value">{{ totalContent() }}</div>
+        </div>
+      </div>
+      <div class="kpi-trend up">{{ categoriesCount() }} catégories</div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="charts-row">
+
+    <!-- DONUT CHART — Répartition Films vs Séries -->
+    <div class="chart-panel">
+      <h3>🍩 Répartition du catalogue</h3>
+      <div class="donut-wrapper">
+        <svg viewBox="0 0 200 200" class="donut-svg">
+          <!-- Cercle de fond -->
+          <circle cx="100" cy="100" r="70" fill="none" stroke="#1e293b" stroke-width="28" />
+          <!-- Arc Films -->
+          <circle cx="100" cy="100" r="70" fill="none" stroke="#3d8ef0" stroke-width="28"
+            [attr.stroke-dasharray]="movieArc() + ' ' + totalArc()" stroke-dashoffset="0"
+            transform="rotate(-90 100 100)" />
+          <!-- Arc Séries -->
+          <circle cx="100" cy="100" r="70" fill="none" stroke="#a855f7" stroke-width="28"
+            [attr.stroke-dasharray]="seriesArc() + ' ' + totalArc()" [attr.stroke-dashoffset]="-movieArc()"
+            transform="rotate(-90 100 100)" />
+          <!-- Centre -->
+          <text x="100" y="95" text-anchor="middle" fill="#e2e8f0" font-size="22" font-weight="800">{{ totalContent()
+            }}</text>
+          <text x="100" y="115" text-anchor="middle" fill="#64748b" font-size="11">contenus</text>
+        </svg>
+      </div>
+      <div class="donut-legend">
+        <div class="legend-item">
+          <span class="legend-dot blue"></span>
+          <span>Films</span>
+          <strong>{{ totalMovies() }}</strong>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot purple"></span>
+          <span>Séries</span>
+          <strong>{{ totalSeries() }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- BAR CHART — Par catégorie -->
+    <div class="chart-panel">
+      <h3>📊 Contenus par catégorie</h3>
+      <div class="bar-chart">
+        @for (cat of byCategory(); track cat.name) {
+        <div class="bar-row">
+          <span class="bar-label" [title]="cat.name">{{ cat.name }}</span>
+          <div class="bar-track">
+            <div class="bar-fill" [style.width.%]="(cat.count / maxCategoryCount()) * 100"
+              [style.background]="cat.color">
+            </div>
+            <span class="bar-value">{{ cat.count }}</span>
+          </div>
+        </div>
+        } @empty {
+        <p class="empty-msg">Aucune catégorie.</p>
+        }
+      </div>
+    </div>
+
+    <!-- RATING HISTOGRAM -->
+    <div class="chart-panel">
+      <h3>⭐ Distribution des notes</h3>
+      <div class="histogram">
+        @for (bucket of ratingBuckets(); track bucket.label) {
+        <div class="histo-col">
+          <div class="histo-bar-wrap">
+            <div class="histo-bar" [style.height.%]="bucket.height" [title]="bucket.count + ' contenus'">
+            </div>
+          </div>
+          <span class="histo-label">{{ bucket.label }}</span>
+        </div>
+        }
+      </div>
+      <div class="histo-hint">Note /10</div>
+    </div>
+
+  </div>
+
+  <!-- TOP 5 + RÉCENTS -->
+  <div class="bottom-row">
+
+    <!-- TOP 5 -->
+    <div class="chart-panel">
+      <h3>🏆 Top 5 mieux notés</h3>
+      <div class="top-list">
+        @for (movie of topRated(); track movie.id; let i = $index) {
+        <div class="top-item" (click)="goToMovie(movie)"
+          [routerLink]="movie.type === 'SERIES' ? ['/series', movie.id] : ['/watch', movie.id]">
+          <div class="rank" [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+            {{ i + 1 }}
+          </div>
+          <div class="top-thumb">
+            @if (getThumbnail(movie)) {
+            <img [src]="getThumbnail(movie)!" [alt]="movie.title">
+            } @else {
+            <div class="thumb-ph">{{ movie.type === 'SERIES' ? '📺' : '🎬' }}</div>
+            }
+          </div>
+          <div class="top-info">
+            <span class="top-title">{{ movie.title }}</span>
+            <span class="top-meta">
+              {{ movie.type === 'SERIES' ? 'Série' : 'Film' }} · {{ movie.releaseYear }}
+            </span>
+          </div>
+          <div class="top-score">⭐ {{ movie.rating }}</div>
+        </div>
+        } @empty {
+        <p class="empty-msg">Aucun contenu noté.</p>
+        }
+      </div>
+    </div>
+
+    <!-- RÉCENTS -->
+    <div class="chart-panel recent-panel">
+      <div class="panel-top-row">
+        <h3>🕐 Derniers ajouts</h3>
+        <a routerLink="/explorer" class="see-all-link">Voir tout →</a>
+      </div>
+      <div class="recent-grid">
+        @for (movie of recentContent(); track movie.id) {
+        <div class="recent-card" [routerLink]="movie.type === 'SERIES' ? ['/series', movie.id] : ['/watch', movie.id]">
+          <div class="recent-thumb">
+            @if (getThumbnail(movie)) {
+            <img [src]="getThumbnail(movie)!" [alt]="movie.title">
+            } @else {
+            <div class="recent-ph">{{ movie.type === 'SERIES' ? '📺' : '🎬' }}</div>
+            }
+            <span class="recent-badge" [class.series]="movie.type === 'SERIES'">
+              {{ movie.type === 'SERIES' ? 'Série' : 'Film' }}
+            </span>
+          </div>
+          <div class="recent-info">
+            <h4>{{ movie.title }}</h4>
+            @if (movie.rating) { <span class="rc-rating">⭐ {{ movie.rating }}</span> }
+            @if (movie.releaseYear) { <span class="rc-year">{{ movie.releaseYear }}</span> }
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+  </div>
+  }
+</div>

@@ -41,6 +41,9 @@ public class User {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     // Dans User.java (Optionnel mais recommandé)
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Movie> movies;

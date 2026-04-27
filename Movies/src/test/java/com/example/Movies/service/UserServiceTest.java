@@ -1,6 +1,7 @@
 package com.example.Movies.service;
 
 import com.example.Movies.dto.UserDTO;
+import com.example.Movies.entity.Role;
 import com.example.Movies.entity.User;
 import com.example.Movies.mapper.UserMapper;
 import com.example.Movies.repository.UserRepository;
@@ -50,7 +51,8 @@ class UserServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        userDTO = new UserDTO(1L, "test@example.com", "rawPassword", LocalDateTime.now());
+        // Added "Mohamed" (or any test name) as the second argument
+        new UserDTO(1L, "Test User", "test@test.com", "password123", Role.USER, LocalDateTime.now());
     }
 
     // --- SCÉNARIOS GET ALL ---

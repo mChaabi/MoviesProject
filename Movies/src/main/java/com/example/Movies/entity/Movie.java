@@ -29,6 +29,9 @@ public class Movie {
     @Column(name = "video_url")
     private String videoUrl;
 
+    @Column(name = "cover_url")
+    private String coverUrl;
+
     // 🆕 NOUVEAU : type MOVIE ou SERIES
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
@@ -66,6 +69,9 @@ public class Movie {
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Watchlist> watchlists;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

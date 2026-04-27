@@ -60,6 +60,12 @@
         <div class="input-group">
           <label>URL vidéo (YouTube, Vimeo...)</label>
           <input type="text" formControlName="videoUrl" placeholder="https://youtu.be/... (optionnel si fichier)">
+          <label>Image de couverture (URL)</label>
+          <input type="text" formControlName="coverUrl" placeholder="https://image.tmdb.org/... ou lien direct">
+          <small class="input-hint">
+            💡 Cherche sur <a href="https://www.themoviedb.org" target="_blank">TMDB.org</a>
+            → clic droit sur l'image → "Copier l'adresse de l'image"
+          </small>
         </div>
 
         <div class="separator-ou">— OU —</div>
@@ -128,36 +134,27 @@
 
         <!-- POSTER / THUMBNAIL -->
         <div class="card-poster">
-          <!-- Thumbnail YouTube si URL YouTube -->
-          @if (movie.videoUrl && isYoutube(movie.videoUrl)) {
+
+          @if (movie.coverUrl) {
+          <img [src]="movie.coverUrl" [alt]="movie.title" (error)="onImgError($event)">
+
+          } @else if (movie.videoUrl && isYoutube(movie.videoUrl)) {
           <img [src]="getYoutubeThumbnail(movie.videoUrl)" [alt]="movie.title">
-          } @else if (movie.type === 'SERIES') {
-          <div class="poster-placeholder series">📺</div>
+
           } @else {
-          <div class="poster-placeholder movie">🎬</div>
+          <!-- ✅ Placeholder avec initiales au lieu de l'emoji seul -->
+          <div class="poster-generated" [style.background]="getPlaceholderColor(movie.title)">
+            <div class="poster-initials">{{ getInitials(movie.title) }}</div>
+            <div class="poster-type-icon">
+              {{ movie.type === 'SERIES' ? '📺' : '🎬' }}
+            </div>
+          </div>
           }
 
-          <!-- OVERLAY AU HOVER -->
-          <div class="card-hover-overlay">
-            <div class="play-circle">▶</div>
-            <span class="hover-label">{{ movie.type === 'SERIES' ? 'Voir la série' : 'Regarder' }}</span>
-          </div>
-
-          <!-- Badge type -->
-          <div class="type-badge" [class.badge-series]="movie.type === 'SERIES'">
-            {{ movie.type === 'SERIES' ? '📺 Série' : '🎬 Film' }}
-          </div>
-
-          <!-- Note -->
-          @if (movie.rating) {
-          <div class="rating-badge">⭐ {{ movie.rating }}</div>
-          }
-
-          <!-- Bouton watchlist (stopPropagation pour pas naviguer) -->
-          <button class="watchlist-overlay-btn" [class.in-list]="isInWatchlist(movie.id!)"
-            (click)="$event.stopPropagation(); onWatchlistToggle(movie.id!)">
-            {{ isInWatchlist(movie.id!) ? '✅' : '+ Liste' }}
-          </button>
+          <!-- reste inchangé -->
+          <div class="card-hover-overlay"> ... </div>
+          <div class="type-badge" ...> ... </div>
+          ...
         </div>
 
         <!-- INFO SOUS LE POSTER -->

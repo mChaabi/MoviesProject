@@ -1,0 +1,38 @@
+<div class="main-wrapper">
+  <div class="glass-card">
+
+    <div class="brand">Movies<span>Hub</span></div>
+    <h2>Connexion</h2>
+    <p class="subtitle">Accédez à votre plateforme</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" autocomplete="off">
+
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="votre@email.com" autocomplete="none"
+          [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+      </div>
+
+      <div class="input-group">
+        <label>Mot de passe</label>
+        <input type="password" formControlName="password" placeholder="••••••••" autocomplete="new-password"
+          [class.invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+      </div>
+
+      <!-- Message d'erreur login -->
+      @if (errorMessage) {
+      <div class="alert-error">⚠️ {{ errorMessage }}</div>
+      }
+
+      <button type="submit" class="submit-btn" [disabled]="loginForm.invalid || loading">
+        {{ loading ? 'Connexion...' : 'Se connecter' }}
+      </button>
+
+      <p class="login-link">
+        Pas de compte ?
+        <a routerLink="/register">Créer un compte</a>
+      </p>
+
+    </form>
+  </div>
+</div>

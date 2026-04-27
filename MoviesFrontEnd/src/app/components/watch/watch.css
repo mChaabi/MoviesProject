@@ -90,3 +90,77 @@ h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: .5rem; }
 .comment-item p { font-size: .88rem; color: #cbd5e1; }
 .no-comments { color: #475569; font-size: .85rem; }
 .loading { text-align: center; padding: 4rem; color: #64748b; }
+
+
+/* Ajoute à la fin de watch.css */
+
+.movie-main-info {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.cover-img {
+  width: 120px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  border: 1px solid #1e293b;
+}
+
+.movie-text { flex: 1; }
+
+.type-tag {
+  background: rgba(232,184,75,.15);
+  color: #e8b84b;
+  padding: .15rem .5rem;
+  border-radius: 10px;
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+.type-tag.series {
+  background: rgba(168,85,247,.15);
+  color: #a855f7;
+}
+
+.author-info {
+  margin-top: .8rem;
+  font-size: .82rem;
+  color: #475569;
+}
+
+.no-video {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background: #131923;
+  border-radius: 12px;
+  gap: 1rem;
+  color: #64748b;
+}
+
+.no-video-icon { font-size: 3rem; opacity: .4; }
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem;
+  color: #64748b;
+}
+
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid #1e293b;
+  border-top-color: #3d8ef0;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

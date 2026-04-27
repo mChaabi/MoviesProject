@@ -21,4 +21,5 @@ export interface Movie {
   durationMinutes?: number; // Pour les films
   seasons?: Season[];       // Pour les séries
   totalSeasons?: number;
+   coverUrl?: string;   // 🆕
 }

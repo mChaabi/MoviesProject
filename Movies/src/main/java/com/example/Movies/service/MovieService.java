@@ -118,11 +118,25 @@ public class MovieService {
 
     private String saveVideo(MultipartFile file) throws IOException {
         if (file.isEmpty()) throw new RuntimeException("Fichier vide");
+
         File uploadDir = new File(UPLOAD_DIR);
         if (!uploadDir.exists()) uploadDir.mkdirs();
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+        // ✅ Nettoyer le nom — supprimer caractères non-ASCII (arabes, espaces, accents)
+        String originalName = file.getOriginalFilename();
+        String extension = originalName != null && originalName.contains(".")
+                ? originalName.substring(originalName.lastIndexOf("."))
+                : ".mp4";
+
+        // Garder seulement lettres/chiffres/tirets
+        String safeName = originalName != null
+                ? originalName.replaceAll("[^a-zA-Z0-9._-]", "_").replaceAll("_+", "_")
+                : "video";
+
+        String fileName = System.currentTimeMillis() + "_" + safeName;
         Path path = Paths.get(UPLOAD_DIR).resolve(fileName);
         Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
         return fileName;
     }
 }

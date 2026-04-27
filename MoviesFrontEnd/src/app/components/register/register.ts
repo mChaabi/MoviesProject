@@ -1,55 +1,55 @@
-import { Component, signal, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+// register.ts
+import { Component, inject } from '@angular/core';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { UserService } from '../../services/user-service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterModule],
   templateUrl: './register.html',
-  styleUrls: ['./register.css']
+  styleUrl: './register.css'
 })
-export class RegisterComponent {
+export class Register {
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
   private router = inject(Router);
 
-  isLoading = signal(false);
-  errorMessage = signal<string | null>(null);
+  loading = false;
+  errorMessage = '';
+  successMessage = '';
 
-  // Définition du formulaire avec validations
   registerForm = this.fb.group({
-    email: ['', [
-      Validators.required,
-      Validators.email,
-      Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$') // Validation stricte
-    ]],
-    password: ['', [
-      Validators.required,
-      Validators.minLength(8),
-      // Optionnel : impose au moins une majuscule et un chiffre
-      Validators.pattern('^(?=.*[A-Z])(?=.*\\d).+$')
-    ]]
+    name:     ['', [Validators.required, Validators.minLength(2)]],
+    email:    ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(8)]]
   });
 
-  onSubmit() {
-    if (this.registerForm.valid) {
-      this.isLoading.set(true);
-      // On envoie la valeur du formulaire (email + password)
-      this.userService.register(this.registerForm.value as any).subscribe({
-      next: (user) => {
-        this.isLoading.set(false);
-        // On stocke l'ID de l'utilisateur pour pouvoir ajouter des films plus tard
-       localStorage.setItem('userId', user.id?.toString() ?? '');
-        this.router.navigate(['/movies']); // Redirection vers le dashboard
+  onRegister() {
+    if (this.registerForm.invalid) return;
+
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const { name, email, password } = this.registerForm.value;
+
+    this.userService.register({
+      name: name!,
+      email: email!,
+      password: password!
+    }).subscribe({
+      next: () => {
+        this.loading = false;
+        this.successMessage = 'Compte créé ! Redirection vers le login...';
+        setTimeout(() => this.router.navigate(['/login']), 1500);
       },
-        error: (err) => {
-          this.isLoading.set(false);
-          this.errorMessage.set(err.error?.message || 'Erreur serveur');
-        }
-      });
-    }
+      error: () => {
+        this.loading = false;
+        this.errorMessage = 'Cet email est déjà utilisé.';
+      }
+    });
   }
 }

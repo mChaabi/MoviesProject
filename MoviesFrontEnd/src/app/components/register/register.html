@@ -1,43 +1,59 @@
+<!-- register.html -->
 <div class="main-wrapper">
   <div class="glass-card">
-    <h2>Inscription</h2>
 
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <div class="brand">Movies<span>Hub</span></div>
+    <h2>Créer un compte</h2>
+    <p class="subtitle">Rejoignez la communauté</p>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+
+      <div class="input-group">
+        <label>Nom complet</label>
+        <input type="text" formControlName="name"
+               placeholder="Votre nom..."
+               [class.invalid]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched">
+        @if (registerForm.get('name')?.touched && registerForm.get('name')?.invalid) {
+          <div class="error-msg">Nom requis</div>
+        }
+      </div>
 
       <div class="input-group">
         <label>Email</label>
-        <input type="email" formControlName="email" placeholder="votre@email.com"
+        <input type="email" formControlName="email"
+               placeholder="votre@email.com"
                [class.invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
-
-        @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
-          <div class="error-msg">
-            @if (registerForm.get('email')?.errors?.['required']) { L'email est obligatoire. }
-            @if (registerForm.get('email')?.errors?.['email'] || registerForm.get('email')?.errors?.['pattern']) {
-              Format d'email invalide.
-            }
-          </div>
+        @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
+          <div class="error-msg">Email invalide</div>
         }
       </div>
 
       <div class="input-group">
         <label>Mot de passe</label>
-        <input type="password" formControlName="password" placeholder="••••••••"
+        <input type="password" formControlName="password"
+               placeholder="Min. 8 caractères"
                [class.invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-
-        @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
-          <div class="error-msg">
-            @if (registerForm.get('password')?.errors?.['required']) { Requis. }
-            @if (registerForm.get('password')?.errors?.['minlength']) { 8 caractères minimum. }
-            @if (registerForm.get('password')?.errors?.['pattern']) {
-              Doit contenir une majuscule et un chiffre.
-            }
-          </div>
+        @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
+          <div class="error-msg">Minimum 8 caractères</div>
         }
       </div>
 
-      <button type="submit" [disabled]="registerForm.invalid || isLoading()" class="submit-btn">
-        {{ isLoading() ? 'Chargement...' : 'S\'inscrire' }}
+      @if (errorMessage) {
+        <div class="alert-error">⚠️ {{ errorMessage }}</div>
+      }
+
+      @if (successMessage) {
+        <div class="alert-success">✅ {{ successMessage }}</div>
+      }
+
+      <button type="submit" class="submit-btn" [disabled]="registerForm.invalid || loading">
+        {{ loading ? 'Création...' : 'Créer mon compte' }}
       </button>
+
+      <p class="login-link">
+        Déjà inscrit ?
+        <a routerLink="/login">Se connecter</a>
+      </p>
 
     </form>
   </div>

@@ -1,19 +1,29 @@
+@if (showNav()) {
 <nav class="main-nav">
-  <div class="logo" routerLink="/">Movies<span>Hub</span></div>
+  <div class="logo" [routerLink]="isAdmin() ? '/admin/stats' : '/explorer'">
+    Movies<span>Hub</span>
+  </div>
 
   <div class="nav-actions">
-    <a routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}">Explorer</a>
-    <a routerLink="/watchlist" routerLinkActive="active-link">Ma Liste</a>
-    <a routerLink="/categories" routerLinkActive="active-link">Catégories</a>
-    <a routerLink="/profile" routerLinkActive="active-link">Watch</a>
-    <a routerLink="/register" class="btn-register">Inscription</a>
+    <a routerLink="/admin/stats" routerLinkActive="active-link">📊 Stats</a>
+    <a routerLink="/watchlist" routerLinkActive="active-link">⭐ Ma Liste</a>
+
+    @if (isAdmin()) {
+     <a routerLink="/explorer" routerLinkActive="active-link">🎬 Explorer</a>
+    <a routerLink="/categories" routerLinkActive="active-link">📁 Catégories</a>
+    }
+
+    <button class="logout-btn" (click)="logout()">Déconnexion</button>
   </div>
 </nav>
+}
 
 <main class="content-area">
   <router-outlet></router-outlet>
 </main>
 
+@if (isLoggedIn()) {
 <footer class="main-footer">
   <p>&copy; 2026 MoviesHub - Votre plateforme de streaming personnelle</p>
 </footer>
+}

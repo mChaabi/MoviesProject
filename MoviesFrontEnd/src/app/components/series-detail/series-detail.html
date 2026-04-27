@@ -6,17 +6,17 @@
     </a>
 
     @if (series(); as s) {
-      <span class="series-badge">SÉRIE TV</span>
-      <h1>{{ s.title }}</h1>
-      <div class="series-meta">
-        <span class="rating">★ {{ s.rating }}</span>
-        <span>{{ s.releaseYear }}</span>
-        <span>{{ seasons().length }} Saisons</span>
-        <span>{{ s.genre }}</span>
-      </div>
-      <p class="series-description">{{ s.description }}</p>
+    <span class="series-badge">SÉRIE TV</span>
+    <h1>{{ s.title }}</h1>
+    <div class="series-meta">
+      <span class="rating">★ {{ s.rating }}</span>
+      <span>{{ s.releaseYear }}</span>
+      <span>{{ seasons().length }} Saisons</span>
+      <span>{{ s.genre }}</span>
+    </div>
+    <p class="series-description">{{ s.description }}</p>
     } @else {
-      <div class="loading">Chargement des informations...</div>
+    <div class="loading">Chargement des informations...</div>
     }
   </header>
 
@@ -31,130 +31,142 @@
       </div>
 
       @if (showAddSeason()) {
-        <form [formGroup]="seasonForm" (ngSubmit)="onAddSeason()" class="mini-form">
-          <input type="number" formControlName="seasonNumber" placeholder="N° Saison">
-          <input type="text" formControlName="title" placeholder="Titre (optionnel)">
-          <button type="submit" class="btn-submit-mini" [disabled]="!seasonForm.valid">Créer</button>
-        </form>
+      <form [formGroup]="seasonForm" (ngSubmit)="onAddSeason()" class="mini-form">
+        <input type="number" formControlName="seasonNumber" placeholder="N° Saison">
+        <input type="text" formControlName="title" placeholder="Titre (optionnel)">
+        <button type="submit" class="btn-submit-mini" [disabled]="!seasonForm.valid">Créer</button>
+      </form>
       }
 
       <ul class="seasons-list">
         @for (season of seasons(); track season.id) {
-          <li [class.active]="selectedSeason()?.id === season.id" (click)="selectSeason(season)">
-            <div class="season-info">
-              <div class="season-num">{{ season.seasonNumber }}</div>
-              <div class="season-text">
-                <strong>Saison {{ season.seasonNumber }}</strong>
-                <small>{{ season.title || 'Pas de titre' }}</small>
-              </div>
+        <li [class.active]="selectedSeason()?.id === season.id" (click)="selectSeason(season)">
+          <div class="season-info">
+            <div class="season-num">{{ season.seasonNumber }}</div>
+            <div class="season-text">
+              <strong>Saison {{ season.seasonNumber }}</strong>
+              <small>{{ season.title || 'Pas de titre' }}</small>
             </div>
-            <button class="btn-del-small" (click)="deleteSeason(season.id!); $event.stopPropagation()">×</button>
-          </li>
+          </div>
+          <button class="btn-del-small" (click)="deleteSeason(season.id!); $event.stopPropagation()">×</button>
+        </li>
         } @empty {
-          <div class="empty-seasons">Aucune saison pour le moment.</div>
+        <div class="empty-seasons">Aucune saison pour le moment.</div>
         }
       </ul>
     </aside>
 
     <main class="episodes-panel">
       @if (selectedSeason(); as currentSeason) {
-        <div class="episodes-header">
-          <h3>Épisodes — Saison {{ currentSeason.seasonNumber }}</h3>
-          <button class="btn-add-small" (click)="showAddEpisode.set(!showAddEpisode())">
-            {{ showAddEpisode() ? 'Fermer' : '+ Ajouter un épisode' }}
-          </button>
+      <div class="episodes-header">
+        <h3>Épisodes — Saison {{ currentSeason.seasonNumber }}</h3>
+        <button class="btn-add-small" (click)="showAddEpisode.set(!showAddEpisode())">
+          {{ showAddEpisode() ? 'Fermer' : '+ Ajouter un épisode' }}
+        </button>
+      </div>
+
+      @if (showAddEpisode()) {
+      <form [formGroup]="episodeForm" (ngSubmit)="onAddEpisode()" class="add-episode-form">
+        <div class="form-row">
+          <div class="form-field">
+            <label>Numéro</label>
+            <input type="number" formControlName="episodeNumber">
+          </div>
+          <div class="form-field">
+            <label>Durée (min)</label>
+            <input type="number" formControlName="durationMinutes">
+          </div>
         </div>
+        <div class="form-field">
+          <label>Titre de l'épisode</label>
+          <input type="text" formControlName="title">
+        </div>
+        <div class="form-field">
+          <label>Description</label>
+          <textarea formControlName="description" rows="2"></textarea>
+        </div>
+        <label class="file-label" [class.file-selected]="selectedEpisodeFile">
+          {{ selectedEpisodeFile ? '📄 ' + selectedEpisodeFile.name : '📁 Sélectionner la vidéo (Max 1 Go)' }}
+          <input type="file" (change)="onEpisodeFileSelected($event)" accept="video/*" hidden>
+        </label>
+        <button type="submit" class="btn-submit-episode" [disabled]="!episodeForm.valid || !selectedEpisodeFile">
+          Téléverser l'épisode
+        </button>
+      </form>
+      }
 
-        @if (showAddEpisode()) {
-          <form [formGroup]="episodeForm" (ngSubmit)="onAddEpisode()" class="add-episode-form">
-            <div class="form-row">
-              <div class="form-field">
-                <label>Numéro</label>
-                <input type="number" formControlName="episodeNumber">
-              </div>
-              <div class="form-field">
-                <label>Durée (min)</label>
-                <input type="number" formControlName="durationMinutes">
-              </div>
+      @if (isLoadingEpisodes()) {
+      <div class="loading">Chargement des épisodes...</div>
+      } @else {
+      <div class="episodes-list">
+        @for (ep of episodes(); track ep.id) {
+        <div class="episode-card" [class.playing]="activeEpisode()?.id === ep.id">
+          <div class="episode-num">{{ ep.episodeNumber }}</div>
+          <div class="episode-info">
+            <h4>{{ ep.title }}</h4>
+            <p>{{ ep.description }}</p>
+            <div class="episode-meta">
+              <span>{{ ep.durationMinutes }} min</span>
+              @if (getProgress(ep.id!) > 0) {
+              <span class="progress-text">{{ getProgress(ep.id!) }}% vu</span>
+              }
             </div>
-            <div class="form-field">
-              <label>Titre de l'épisode</label>
-              <input type="text" formControlName="title">
+            @if (getProgress(ep.id!) > 0) {
+            <div class="ep-progress-bar">
+              <div class="ep-progress-fill" [style.width.%]="getProgress(ep.id!)"></div>
             </div>
-            <div class="form-field">
-              <label>Description</label>
-              <textarea formControlName="description" rows="2"></textarea>
-            </div>
-            <label class="file-label" [class.file-selected]="selectedEpisodeFile">
-              {{ selectedEpisodeFile ? '📄 ' + selectedEpisodeFile.name : '📁 Sélectionner la vidéo (Max 1 Go)' }}
-              <input type="file" (change)="onEpisodeFileSelected($event)" accept="video/*" hidden>
-            </label>
-            <button type="submit" class="btn-submit-episode" [disabled]="!episodeForm.valid || !selectedEpisodeFile">
-              Téléverser l'épisode
-            </button>
-          </form>
-        }
-
-        @if (isLoadingEpisodes()) {
-          <div class="loading">Chargement des épisodes...</div>
-        } @else {
-          <div class="episodes-list">
-            @for (ep of episodes(); track ep.id) {
-              <div class="episode-card" [class.playing]="activeEpisode()?.id === ep.id">
-                <div class="episode-num">{{ ep.episodeNumber }}</div>
-                <div class="episode-info">
-                  <h4>{{ ep.title }}</h4>
-                  <p>{{ ep.description }}</p>
-                  <div class="episode-meta">
-                    <span>{{ ep.durationMinutes }} min</span>
-                    @if (getProgress(ep.id!) > 0) {
-                      <span class="progress-text">{{ getProgress(ep.id!) }}% vu</span>
-                    }
-                  </div>
-                  @if (getProgress(ep.id!) > 0) {
-                    <div class="ep-progress-bar">
-                      <div class="ep-progress-fill" [style.width.%]="getProgress(ep.id!)"></div>
-                    </div>
-                  }
-                </div>
-                <div class="episode-actions">
-                  <button class="play-btn" (click)="playEpisode(ep)">▶</button>
-                  <button class="del-btn" (click)="deleteEpisode(ep.id!)">🗑</button>
-                </div>
-              </div>
-            } @empty {
-              <div class="empty-episodes">Cette saison ne contient pas encore d'épisodes.</div>
             }
           </div>
+          <div class="episode-actions">
+            <button class="play-btn" (click)="playEpisode(ep)">▶</button>
+            <button class="del-btn" (click)="deleteEpisode(ep.id!)">🗑</button>
+          </div>
+        </div>
+        } @empty {
+        <div class="empty-episodes">Cette saison ne contient pas encore d'épisodes.</div>
         }
+      </div>
+      }
       } @else {
-        <div class="select-season-hint">Sélectionnez une saison pour voir les épisodes</div>
+      <div class="select-season-hint">Sélectionnez une saison pour voir les épisodes</div>
       }
     </main>
 
     <section class="player-panel">
       @if (activeEpisode(); as currentEp) {
-        <div class="player-wrapper">
-          <div class="player-header">
-            <span class="now-playing">Lecture en cours</span>
-            <h4>{{ currentEp.title }}</h4>
-            <small>Saison {{ selectedSeason()?.seasonNumber }} — Épisode {{ currentEp.episodeNumber }}</small>
-          </div>
+      <div class="player-wrapper">
+        <div class="player-header">
+          <span class="now-playing">Lecture en cours</span>
+          <h4>{{ currentEp.title }}</h4>
+          <small>Saison {{ selectedSeason()?.seasonNumber }} — Épisode {{ currentEp.episodeNumber }}</small>
+        </div>
 
-          <video
-            class="episode-video"
-            controls
-            autoplay
-            [src]="currentEp.videoUrl"
-            (timeupdate)="onEpisodeTimeUpdate($event, currentEp.id!)">
-            Votre navigateur ne supporte pas la lecture de vidéos.
-          </video>
-        </div>
+        @if (currentEp.videoUrl) {
+
+        <!-- IFRAME pour YouTube, Dailymotion, Vimeo -->
+        @if (isEmbed(currentEp.videoUrl)) {
+        <iframe [src]="safeEpisodeUrl(currentEp.videoUrl)" class="episode-video" frameborder="0" allowfullscreen
+          allow="autoplay; fullscreen" style="border-radius:10px; margin-top:1rem">
+        </iframe>
+
+        <!-- VIDEO directe pour MP4 / fichiers locaux -->
+        } @else {
+        <video class="episode-video" controls autoplay (timeupdate)="onEpisodeTimeUpdate($event, currentEp.id!)">
+          <source [src]="getDirectVideoUrl(currentEp.videoUrl)" type="video/mp4">
+          Votre navigateur ne supporte pas la lecture vidéo.
+        </video>
+        }
+
+        } @else {
+        <div class="no-video-msg">⚠️ Aucune vidéo associée à cet épisode.</div>
+        }
+
+      </div>
       } @else {
-        <div class="player-placeholder">
-          <div class="placeholder-icon">📺</div>
-          <p>Prêt à regarder ?<br><small>Choisissez un épisode pour lancer le lecteur</small></p>
-        </div>
+      <div class="player-placeholder">
+        <div class="placeholder-icon">📺</div>
+        <p>Prêt à regarder ?<br><small>Choisissez un épisode pour lancer le lecteur</small></p>
+      </div>
       }
     </section>
 

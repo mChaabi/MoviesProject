@@ -1,6 +1,7 @@
 export interface User {
   id?: number;
+  name: string;
   email: string;
-  password?: string; // Optionnel car on ne le reçoit pas toujours en retour
+  role: 'ADMIN' | 'USER'; // <-- Ajoute cette ligne
   createdAt?: string;
 }

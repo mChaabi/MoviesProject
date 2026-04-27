@@ -1,67 +1,107 @@
-/* Structure de base */
-:host {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #0f1115; /* Fond sombre moderne */
-  color: #e2e8f0;
-  font-family: 'Inter', sans-serif;
+/* ═══════════════════════════════════
+   APP.CSS — Styles globaux MoviesHub
+   ═══════════════════════════════════ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* NAVBAR PROFESSIONNELLE */
+html, body {
+  height: 100%;
+  background: #080c14;   /* ✅ Fond sombre global */
+  color: #e2e8f0;
+  font-family: 'Segoe UI', 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NAV ── */
 .main-nav {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem 4rem;
-  background: rgba(15, 17, 21, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid #2d3139;
+  justify-content: space-between;
+  padding: 0 2.5rem;
+  height: 64px;
+  background: rgba(8,12,20,.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid #1e293b;
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 100;
 }
 
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 800;
+  color: #e2e8f0;
   cursor: pointer;
-  letter-spacing: -1px;
+  letter-spacing: .02em;
+  text-decoration: none;
 }
 
-.logo span {
-  color: #3b82f6; /* Le "Hub" en bleu */
-}
+.logo span { color: #3d8ef0; }
 
 .nav-actions {
   display: flex;
-  gap: 2rem;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .nav-actions a {
-  color: #94a3b8;
-  text-decoration: none;
+  font-size: .85rem;
   font-weight: 500;
-  font-size: 0.95rem;
-  transition: color 0.2s;
-}
-
-.nav-actions a:hover, .nav-actions a.active-link {
-  color: #ffffff;
-}
-
-/* ZONE DE CONTENU */
-.content-area {
-  flex: 1;
-  padding: 2rem 4rem;
-}
-
-/* FOOTER */
-.main-footer {
-  padding: 2rem;
-  text-align: center;
-  border-top: 1px solid #2d3139;
   color: #64748b;
-  font-size: 0.85rem;
-  background: #0f1115;
+  text-decoration: none;
+  letter-spacing: .02em;
+  transition: color .2s;
+  padding: .3rem 0;
 }
+
+.nav-actions a:hover { color: #e2e8f0; }
+
+.nav-actions a.active-link {
+  color: #e2e8f0;
+  border-bottom: 2px solid #3d8ef0;
+  padding-bottom: 2px;
+}
+
+/* Bouton logout */
+.logout-btn {
+  padding: .4rem 1.1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(239,68,68,.3);
+  background: rgba(239,68,68,.08);
+  color: #ef4444;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.logout-btn:hover {
+  background: rgba(239,68,68,.15);
+  border-color: #ef4444;
+}
+
+/* ── CONTENT ── */
+.content-area {
+  min-height: calc(100vh - 64px - 52px);
+  background: #080c14;
+}
+
+/* ── FOOTER ── */
+.main-footer {
+  background: #0d1117;
+  border-top: 1px solid #1e293b;
+  padding: 1rem 2.5rem;
+  text-align: center;
+  font-size: .78rem;
+  color: #334155;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0d1117; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2d3748; }

@@ -412,3 +412,29 @@
   .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid #1e293b; }
   .movies-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
 }
+
+
+/* Ajoute à la fin de category-component.css */
+
+.poster-generated {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+}
+
+.poster-initials {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: rgba(255,255,255,.22);
+  letter-spacing: .05em;
+  text-align: center;
+}
+
+.poster-type-icon {
+  font-size: 1rem;
+  opacity: .25;
+}

@@ -1,5 +1,5 @@
 // ✅ MODIFIÉ — src/app/components/movie-dashboard/movie-dashboard-component.ts
-import { Component, signal, inject, OnInit, computed, ElementRef , ViewChild} from '@angular/core';
+import { Component, signal, inject, OnInit, computed, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
@@ -21,7 +21,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 @Component({
   selector: 'app-movie-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule,MovieTypeCountPipe,RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, MovieTypeCountPipe, RouterModule],
   templateUrl: './movie-dashboard-component.html',
   styleUrls: ['./movie-dashboard-component.css']
 })
@@ -37,6 +37,8 @@ export class MovieDashboardComponent implements OnInit {
   private watchProgressService = inject(WatchProgressService);
   private sanitizer = inject(DomSanitizer);
   private router = inject(Router);
+  private cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
+
 
   categories = signal<Category[]>([]);
   movies = signal<Movie[]>([]);
@@ -69,15 +71,16 @@ export class MovieDashboardComponent implements OnInit {
   // 🆕 NOUVEAU — progression de visionnage
   progressState = signal<Map<number, number>>(new Map());
 
- movieForm = this.fb.group({
-  title: ['', [Validators.required, Validators.maxLength(100)]],
-  description: ['', [Validators.maxLength(500)]],
-  categoryId: [null, Validators.required],
-  releaseYear: [null],
-  rating: [null],
-  durationMinutes: [null],
-  videoUrl: ['']   // 🆕 AJOUTE CETTE LIGNE
-});
+  movieForm = this.fb.group({
+    title: ['', [Validators.required, Validators.maxLength(100)]],
+    description: ['', [Validators.maxLength(500)]],
+    categoryId: [null, Validators.required],
+    releaseYear: [null],
+    rating: [null],
+    durationMinutes: [null],
+    videoUrl: [''], // 🆕 AJOUTE CETTE LIGNE
+    coverUrl: ['']   // 🆕 AJOUTE CETTE LIGNE
+  });
   ngOnInit() {
     this.loadMovies();
     this.loadCategories();
@@ -97,9 +100,15 @@ export class MovieDashboardComponent implements OnInit {
     }
   }
 
+
   loadMovies() {
     this.movieService.getAllMovies().subscribe(data => {
+
       this.movies.set(data);
+
+      // 🔥 IMPORTANT → forcer Angular à recalculer
+      this.cdr.detectChanges();
+
       data.forEach(movie => {
         if (movie.id) {
           this.loadLikeStatus(movie.id);
@@ -111,26 +120,27 @@ export class MovieDashboardComponent implements OnInit {
           this.loadFollowStatus(movie.authorId);
         }
       });
+
     });
   }
 
   goToWatch(movie: Movie) {
-  if (movie.type === 'SERIES') {
-    this.router.navigate(['/series', movie.id]);
-  } else {
-    this.router.navigate(['/watch', movie.id]);
+    if (movie.type === 'SERIES') {
+      this.router.navigate(['/series', movie.id]);
+    } else {
+      this.router.navigate(['/watch', movie.id]);
+    }
   }
-}
 
-getYoutubeThumbnail(url: string): string {
-  let videoId = '';
-  if (url.includes('youtu.be/')) {
-    videoId = url.split('youtu.be/')[1].split('?')[0];
-  } else if (url.includes('v=')) {
-    videoId = url.split('v=')[1].split('&')[0];
+  getYoutubeThumbnail(url: string): string {
+    let videoId = '';
+    if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1].split('?')[0];
+    } else if (url.includes('v=')) {
+      videoId = url.split('v=')[1].split('&')[0];
+    }
+    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
   }
-  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-}
 
   // 🆕 NOUVEAU — Vérifier si dans la watchlist
   checkWatchlist(movieId: number) {
@@ -245,6 +255,18 @@ getYoutubeThumbnail(url: string): string {
     });
   }
 
+
+  getPlaceholderColor(title: string): string {
+  const colors = ['#1a2540','#1a2030','#201a30','#2a1a20','#1a2a20','#2a2a1a','#1a1a2a','#2a1a2a'];
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) hash = title.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
+getInitials(title: string): string {
+  return title.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+
   triggerFileInput(event: Event) {
     // Si c'est un film et qu'aucun fichier n'est sélectionné
     if (this.addingType() === 'MOVIE' && !this.selectedFile) {
@@ -260,111 +282,116 @@ getYoutubeThumbnail(url: string): string {
     return this.likesState().get(movieId) || { isLiked: false, count: 0 };
   }
 
-// Dans movie-dashboard-component.ts
-loadCategories() {
-  this.categoryService.getAllCategories().subscribe({
-    next: data => {
-      console.log('Catégories chargées:', data); // Vérifiez dans la console F12
-      this.categories.set(data);
-    },
-    error: err => console.error('Erreur de chargement:', err)
-  });
-}
+  // Dans movie-dashboard-component.ts
+  loadCategories() {
+    this.categoryService.getAllCategories().subscribe({
+      next: data => {
+        console.log('Catégories chargées:', data); // Vérifiez dans la console F12
+        this.categories.set(data);
+      },
+      error: err => console.error('Erreur de chargement:', err)
+    });
+  }
 
   onFileDropped(event: DragEvent) {
-  event.preventDefault();
-  if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-    const file = event.dataTransfer.files[0];
-    this.handleFile(file);
+    event.preventDefault();
+    if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
+      const file = event.dataTransfer.files[0];
+      this.handleFile(file);
+    }
   }
-}
-// Modifiez votre fonction onFileSelected existante pour utiliser une logique commune
-onFileSelected(event: any) {
-  const file = event.target.files[0];
-  if (file) {
-    this.handleFile(file);
+  // Modifiez votre fonction onFileSelected existante pour utiliser une logique commune
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.handleFile(file);
+    }
   }
-}
 
-// Logique commune de vérification
-private handleFile(file: File) {
-  const maxSize = 1024 * 1024 * 1024; // 1 Go
-  if (file.size > maxSize) {
-    alert('Fichier trop volumineux. Max 1 Go.');
-    this.selectedFile = null;
-    return;
+  // Logique commune de vérification
+  private handleFile(file: File) {
+    const maxSize = 1024 * 1024 * 1024; // 1 Go
+    if (file.size > maxSize) {
+      alert('Fichier trop volumineux. Max 1 Go.');
+      this.selectedFile = null;
+      return;
+    }
+    this.selectedFile = file;
   }
-  this.selectedFile = file;
-}
 
   onVideoProgress(event: any, movieId: number) {
-  const video = event.target as HTMLVideoElement;
-  const percent = Math.round((video.currentTime / video.duration) * 100);
-  // Ta logique de sauvegarde ici...
-}
-
-isYoutube(url: string): boolean {
-  return url.includes('youtube.com') || url.includes('youtu.be');
-}
-
-isExternalUrl(url: string): boolean {
-  return url.startsWith('http');
-}
-
-safeUrl(url: string): SafeResourceUrl {
-  let videoId = '';
-  if (url.includes('youtu.be/')) {
-    videoId = url.split('youtu.be/')[1].split('?')[0];
-  } else if (url.includes('v=')) {
-    videoId = url.split('v=')[1].split('&')[0];
-  }
-  return this.sanitizer.bypassSecurityTrustResourceUrl(
-    `https://www.youtube.com/embed/${videoId}`
-  );
-}
-
- onAddMovie() {
-  if (!this.movieForm.valid) return;
-
-  const type = this.addingType();
-  const videoUrl = this.movieForm.value.videoUrl;
-
-  // Film : soit fichier, soit URL
-  if (type === 'MOVIE' && !this.selectedFile && !videoUrl) {
-    alert("Choisissez un fichier vidéo ou collez une URL.");
-    return;
+    const video = event.target as HTMLVideoElement;
+    const percent = Math.round((video.currentTime / video.duration) * 100);
+    // Ta logique de sauvegarde ici...
   }
 
-  this.isLoading.set(true);
+  isYoutube(url: string): boolean {
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  }
 
-  const movieData: any = {
-    title: this.movieForm.value.title,
-    description: this.movieForm.value.description,
-    categoryId: this.movieForm.value.categoryId,
-    authorId: this.currentUserId,
-    type,
-    releaseYear: this.movieForm.value.releaseYear,
-    rating: this.movieForm.value.rating,
-    durationMinutes: this.movieForm.value.durationMinutes,
-    videoUrl: videoUrl || null
-  };
+  isExternalUrl(url: string): boolean {
+    return url.startsWith('http');
+  }
 
-  // Si fichier uploadé → multipart, sinon → JSON simple
-  const request$ = this.selectedFile
-    ? this.movieService.createMovie(movieData, this.selectedFile)
-    : this.movieService.createSeries(movieData);
-
-  request$.subscribe({
-    next: newMovie => {
-      this.movies.update(prev => [newMovie, ...prev]);
-      this.movieForm.reset();
-      this.selectedFile = null;
-      this.isLoading.set(false);
-    },
-    error: err => {
-      console.error(err);
-      this.isLoading.set(false);
+  safeUrl(url: string): SafeResourceUrl {
+    let videoId = '';
+    if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1].split('?')[0];
+    } else if (url.includes('v=')) {
+      videoId = url.split('v=')[1].split('&')[0];
     }
-  });
-}
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.youtube.com/embed/${videoId}`
+    );
+  }
+
+  onImgError(event: any) {
+    event.target.style.display = 'none';
+  }
+
+  onAddMovie() {
+    if (!this.movieForm.valid) return;
+
+    const type = this.addingType();
+    const videoUrl = this.movieForm.value.videoUrl;
+
+    // Film : soit fichier, soit URL
+    if (type === 'MOVIE' && !this.selectedFile && !videoUrl) {
+      alert("Choisissez un fichier vidéo ou collez une URL.");
+      return;
+    }
+
+    this.isLoading.set(true);
+
+    const movieData: any = {
+      title: this.movieForm.value.title,
+      description: this.movieForm.value.description,
+      categoryId: this.movieForm.value.categoryId,
+      authorId: this.currentUserId,
+      type,
+      releaseYear: this.movieForm.value.releaseYear,
+      rating: this.movieForm.value.rating,
+      durationMinutes: this.movieForm.value.durationMinutes,
+      videoUrl: videoUrl || null,
+      coverUrl: this.movieForm.value.coverUrl || null   // 🆕
+    };
+
+    // Si fichier uploadé → multipart, sinon → JSON simple
+    const request$ = this.selectedFile
+      ? this.movieService.createMovie(movieData, this.selectedFile)
+      : this.movieService.createSeries(movieData);
+
+    request$.subscribe({
+      next: newMovie => {
+        this.movies.update(prev => [newMovie, ...prev]);
+        this.movieForm.reset();
+        this.selectedFile = null;
+        this.isLoading.set(false);
+      },
+      error: err => {
+        console.error(err);
+        this.isLoading.set(false);
+      }
+    });
+  }
 }

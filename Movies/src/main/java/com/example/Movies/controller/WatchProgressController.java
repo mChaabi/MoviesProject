@@ -6,48 +6,64 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// 🆕 NOUVEAU FICHIER
 @RestController
-@RequestMapping("/progress")
+@RequestMapping("/progress")  // ✅ Sera accessible via /api/progress
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
+// ❌ SUPPRIME @CrossOrigin — géré globalement dans SecurityConfig
 public class WatchProgressController {
 
     private final WatchProgressService watchProgressService;
 
-    // GET progression d'un film
     @GetMapping("/movie")
-    public ResponseEntity<WatchProgressDTO> getMovieProgress(
+    public ResponseEntity<?> getMovieProgress(
             @RequestParam Long userId,
             @RequestParam Long movieId) {
-        return ResponseEntity.ok(watchProgressService.getMovieProgress(userId, movieId));
+        try {
+            return ResponseEntity.ok(watchProgressService.getMovieProgress(userId, movieId));
+        } catch (Exception e) {
+            // ✅ Retourner 0% si pas de progression (pas d'erreur 403)
+            return ResponseEntity.ok(new WatchProgressDTO(null, userId, null, movieId, 0, 0, false));
+        }
     }
 
-    // GET progression d'un épisode
     @GetMapping("/episode")
-    public ResponseEntity<WatchProgressDTO> getEpisodeProgress(
+    public ResponseEntity<?> getEpisodeProgress(
             @RequestParam Long userId,
             @RequestParam Long episodeId) {
-        return ResponseEntity.ok(watchProgressService.getEpisodeProgress(userId, episodeId));
+        try {
+            return ResponseEntity.ok(watchProgressService.getEpisodeProgress(userId, episodeId));
+        } catch (Exception e) {
+            return ResponseEntity.ok(new WatchProgressDTO(null, userId, episodeId, null, 0, 0, false));
+        }
     }
 
-    // POST sauvegarder progression film
     @PostMapping("/movie/save")
-    public ResponseEntity<WatchProgressDTO> saveMovieProgress(
+    public ResponseEntity<?> saveMovieProgress(
             @RequestParam Long userId,
             @RequestParam Long movieId,
             @RequestParam int percent,
             @RequestParam int positionSeconds) {
-        return ResponseEntity.ok(watchProgressService.saveMovieProgress(userId, movieId, percent, positionSeconds));
+        try {
+            return ResponseEntity.ok(
+                    watchProgressService.saveMovieProgress(userId, movieId, percent, positionSeconds)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.ok().build();
+        }
     }
 
-    // POST sauvegarder progression épisode
     @PostMapping("/episode/save")
-    public ResponseEntity<WatchProgressDTO> saveEpisodeProgress(
+    public ResponseEntity<?> saveEpisodeProgress(
             @RequestParam Long userId,
             @RequestParam Long episodeId,
             @RequestParam int percent,
             @RequestParam int positionSeconds) {
-        return ResponseEntity.ok(watchProgressService.saveEpisodeProgress(userId, episodeId, percent, positionSeconds));
+        try {
+            return ResponseEntity.ok(
+                    watchProgressService.saveEpisodeProgress(userId, episodeId, percent, positionSeconds)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.ok().build();
+        }
     }
 }

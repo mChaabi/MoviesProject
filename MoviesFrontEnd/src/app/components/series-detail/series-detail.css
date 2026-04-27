@@ -201,3 +201,24 @@
 }
 .placeholder-icon { font-size: 3.5rem; opacity: .4; }
 .loading { color: #64748b; text-align: center; padding: 2rem; font-size: .9rem; }
+
+.episode-video {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 10px;
+  background: #000;
+  border: 1px solid #1e293b;
+  margin-top: 1rem;
+  display: block;
+}
+
+.no-video-msg {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background: rgba(239,68,68,.08);
+  border: 1px solid rgba(239,68,68,.2);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: .85rem;
+  text-align: center;
+}

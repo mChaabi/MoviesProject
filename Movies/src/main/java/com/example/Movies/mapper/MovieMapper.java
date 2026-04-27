@@ -25,6 +25,7 @@ public class MovieMapper {
                 .id(movie.getId())
                 .title(movie.getTitle())
                 .videoUrl(movie.getVideoUrl())
+                .coverUrl(movie.getCoverUrl())  // 🆕
                 .description(movie.getDescription())
                 .authorId(movie.getAuthor() != null ? movie.getAuthor().getId() : null)
                 .authorName(movie.getAuthor() != null ? movie.getAuthor().getName() : null)
@@ -52,6 +53,7 @@ public class MovieMapper {
         movie.setTitle(dto.title());
         movie.setDescription(dto.description());
         movie.setVideoUrl(dto.videoUrl());
+        movie.setCoverUrl(dto.coverUrl());  // 🆕
         // 🆕 Nouveaux champs
         if (dto.type() != null) movie.setType(dto.type());
         if (dto.rating() != null) movie.setRating(dto.rating());

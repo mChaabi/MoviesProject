@@ -1,51 +1,74 @@
-// ✅ MODIFIÉ — src/app/app.routes.ts
-// Ajoute les nouvelles routes pour séries et watchlist
-
+// app.routes.ts
 import { Routes } from '@angular/router';
 import { MovieDashboardComponent } from './components/movie-dashboard-component/movie-dashboard-component';
 import { CategoryComponent } from './components/category-component/category-component';
 import { SeriesDetailComponent } from './components/series-detail/series-detail';
 import { WatchlistComponent } from './components/watchlist/watchlist';
 import { WatchComponent } from './components/watch/watch';
+import { StatsDashboardComponent } from './components/stats-dashboard/stats-dashboard';
+import { authGuard } from './auth-guard';
 
 export const routes: Routes = [
 
-  // ✅ EXISTANT — Page principale films/séries
+  // 1. Redirection par défaut vers login si on arrive sur le site
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+
+  // ── Pages publiques (sans guard) ──
   {
-    path: '',
-    component: MovieDashboardComponent,
-    title: 'MoviesHub — Explorer'
+    path: 'login',
+    loadComponent: () => import('./components/login/login').then(m => m.Login)
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('./components/register/register').then(m => m.Register)
   },
 
-   { path: 'watch/:id',
-     component: WatchComponent,
-     title: 'MoviesHub — Visionnage'
-   },
-
-  // ✅ EXISTANT — Gestion des catégories
+  // ── Pages ADMIN uniquement ──
+  {
+    path: 'admin/stats',
+    component: StatsDashboardComponent,
+    title: 'MoviesHub — Statistiques',
+    canActivate: [authGuard],
+    data: { role: 'ADMIN' }
+  },
   {
     path: 'categories',
     component: CategoryComponent,
-    title: 'MoviesHub — Catégories'
+    title: 'MoviesHub — Catégories',
+    canActivate: [authGuard],
+    data: { role: 'ADMIN' }
   },
 
-  // 🆕 NOUVEAU — Détail d'une série (saisons + épisodes)
+  // ── Pages USER + ADMIN ──
   {
-    path: 'series/:id',
-    component: SeriesDetailComponent,
-    title: 'MoviesHub — Série'
+    path: 'explorer',
+    component: MovieDashboardComponent,
+    title: 'MoviesHub — Explorer',
+    canActivate: [authGuard]
+    // pas de data.role → accessible à tous les connectés
   },
-
-  // 🆕 NOUVEAU — Ma liste personnelle
   {
     path: 'watchlist',
     component: WatchlistComponent,
-    title: 'MoviesHub — Ma Liste'
+    title: 'MoviesHub — Ma Liste',
+    canActivate: [authGuard]
+  },
+  {
+    path: 'watch/:id',
+    component: WatchComponent,
+    title: 'MoviesHub — Visionnage',
+    canActivate: [authGuard]
+  },
+  {
+    path: 'series/:id',
+    component: SeriesDetailComponent,
+    title: 'MoviesHub — Série',
+    canActivate: [authGuard]
   },
 
-  // Redirection des routes inconnues
+  // ── Fallback ──
   {
     path: '**',
-    redirectTo: ''
+    redirectTo: 'login'
   }
 ];

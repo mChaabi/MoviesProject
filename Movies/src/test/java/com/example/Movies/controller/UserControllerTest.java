@@ -1,6 +1,7 @@
 package com.example.Movies.controller;
 
 import com.example.Movies.dto.UserDTO;
+import com.example.Movies.entity.Role;
 import com.example.Movies.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,8 +40,9 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Initialisation d'un UserDTO de test (Record Java 21)
-        userDTO = new UserDTO(1L, "test@example.com", "password123", LocalDateTime.now());
+        // Added "Mohamed" (or any test name) as the second argument
+        // ✅ NOUVEAU — avec role
+        new UserDTO(1L, "Test User", "test@test.com", "password123", Role.USER, LocalDateTime.now());
     }
 
     @Test

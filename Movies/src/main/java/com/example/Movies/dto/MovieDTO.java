@@ -23,6 +23,7 @@ public record MovieDTO(
 
         // Nullable car les séries n'ont pas de videoUrl directe
         String videoUrl,
+        String coverUrl,      // 🆕
 
         @Size(max = 500, message = "La description est trop longue")
         String description,

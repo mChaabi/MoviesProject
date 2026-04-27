@@ -12,14 +12,8 @@
 
     <!-- Formulaire ajout -->
     <div class="add-form">
-      <input
-        [(ngModel)]="newCategoryName"
-        placeholder="Nouvelle catégorie..."
-        (keyup.enter)="onAddCategory()">
-      <textarea
-        [(ngModel)]="newCategoryDescription"
-        placeholder="Description (optionnel)"
-        rows="2">
+      <input [(ngModel)]="newCategoryName" placeholder="Nouvelle catégorie..." (keyup.enter)="onAddCategory()">
+      <textarea [(ngModel)]="newCategoryDescription" placeholder="Description (optionnel)" rows="2">
       </textarea>
       <button class="btn-add" (click)="onAddCategory()" [disabled]="!newCategoryName()">
         + Ajouter
@@ -32,8 +26,7 @@
     <ul class="cat-list">
 
       <!-- Tout -->
-      <li [class.active]="selectedCategoryId() === null"
-          (click)="onSelectCategory(null)">
+      <li [class.active]="selectedCategoryId() === null" (click)="onSelectCategory(null)">
         <div class="cat-left">
           <span class="cat-icon">🎬</span>
           <div>
@@ -45,22 +38,21 @@
 
       <!-- Catégories -->
       @for (cat of categories(); track cat.id) {
-        <li [class.active]="selectedCategoryId() === cat.id"
-            (click)="onSelectCategory(cat.id!)">
-          <div class="cat-left">
-            <span class="cat-icon">{{ getCategoryIcon(cat.name) }}</span>
-            <div>
-              <span class="cat-name">{{ cat.name }}</span>
-              @if (cat.description) {
-                <small class="cat-desc">{{ cat.description }}</small>
-              }
-            </div>
+      <li [class.active]="selectedCategoryId() === cat.id" (click)="onSelectCategory(cat.id!)">
+        <div class="cat-left">
+          <span class="cat-icon">{{ getCategoryIcon(cat.name) }}</span>
+          <div>
+            <span class="cat-name">{{ cat.name }}</span>
+            @if (cat.description) {
+            <small class="cat-desc">{{ cat.description }}</small>
+            }
           </div>
-          <div class="cat-right">
-            <span class="cat-count">{{ getCountByCategory(cat.id!) }}</span>
-            <button class="btn-del" (click)="$event.stopPropagation(); onDeleteCategory(cat.id!)">×</button>
-          </div>
-        </li>
+        </div>
+        <div class="cat-right">
+          <span class="cat-count">{{ getCountByCategory(cat.id!) }}</span>
+          <button class="btn-del" (click)="$event.stopPropagation(); onDeleteCategory(cat.id!)">×</button>
+        </div>
+      </li>
       }
 
     </ul>
@@ -74,9 +66,9 @@
       <div>
         <h2>
           @if (selectedCategoryId()) {
-            {{ getSelectedCategoryName() }}
+          {{ getSelectedCategoryName() }}
           } @else {
-            Tout le catalogue
+          Tout le catalogue
           }
         </h2>
         <p class="content-stats">
@@ -98,59 +90,70 @@
     <div class="movies-grid">
       @for (movie of displayedMovies(); track movie.id) {
 
-        <div class="movie-card" (click)="goToMovie(movie)">
+      <div class="movie-card" (click)="goToMovie(movie)">
 
-          <!-- POSTER -->
-          <div class="card-poster">
+        <!-- POSTER -->
+        <!-- POSTER -->
+        <div class="card-poster">
 
-            @if (getThumbnail(movie)) {
-              <img [src]="getThumbnail(movie)!" [alt]="movie.title">
-            } @else if (movie.type === 'SERIES') {
-              <div class="poster-placeholder">📺</div>
-            } @else {
-              <div class="poster-placeholder">🎬</div>
-            }
+          @if (getThumbnail(movie)) {
+          <!-- ✅ Cover disponible -->
+          <img [src]="getThumbnail(movie)!" [alt]="movie.title" (error)="$any($event.target).style.display='none'">
 
-            <!-- Overlay hover -->
-            <div class="hover-overlay">
-              <div class="play-btn">▶</div>
-              <span class="play-label">{{ movie.type === 'SERIES' ? 'Voir la série' : 'Regarder' }}</span>
+          } @else {
+          <!-- ✅ Placeholder stylisé avec initiales -->
+          <div class="poster-generated" [style.background]="thumbnailService.getPlaceholderColor(movie.title)">
+            <div class="poster-initials">
+              {{ thumbnailService.getInitials(movie.title) }}
             </div>
+            <div class="poster-type-icon">
+              {{ movie.type === 'SERIES' ? '📺' : '🎬' }}
+            </div>
+          </div>
+          }
 
-            <!-- Badges -->
-            <span class="badge-type" [class.series]="movie.type === 'SERIES'">
-              {{ movie.type === 'SERIES' ? 'Série' : 'Film' }}
+          <!-- Overlay hover -->
+          <div class="hover-overlay">
+            <div class="play-btn">▶</div>
+            <span class="play-label">
+              {{ movie.type === 'SERIES' ? 'Voir la série' : 'Regarder' }}
             </span>
-
-            @if (movie.rating) {
-              <span class="badge-rating">⭐ {{ movie.rating }}</span>
-            }
-
           </div>
 
-          <!-- Infos -->
-          <div class="card-info">
-            <h4>{{ movie.title }}</h4>
-            <div class="card-meta">
-              @if (movie.releaseYear) { <span>{{ movie.releaseYear }}</span> }
-              @if (movie.durationMinutes && movie.type === 'MOVIE') {
-                <span>{{ movie.durationMinutes }} min</span>
-              }
-            </div>
-            <!-- Catégorie badge sous le titre -->
-            @if (!selectedCategoryId() && movie.categoryName) {
-              <span class="cat-tag">{{ getCategoryIcon(movie.categoryName) }} {{ movie.categoryName }}</span>
-            }
-          </div>
+          <!-- Badges -->
+          <span class="badge-type" [class.series]="movie.type === 'SERIES'">
+            {{ movie.type === 'SERIES' ? 'Série' : 'Film' }}
+          </span>
+
+          @if (movie.rating) {
+          <span class="badge-rating">⭐ {{ movie.rating }}</span>
+          }
 
         </div>
+
+        <!-- Infos -->
+        <div class="card-info">
+          <h4>{{ movie.title }}</h4>
+          <div class="card-meta">
+            @if (movie.releaseYear) { <span>{{ movie.releaseYear }}</span> }
+            @if (movie.durationMinutes && movie.type === 'MOVIE') {
+            <span>{{ movie.durationMinutes }} min</span>
+            }
+          </div>
+          <!-- Catégorie badge sous le titre -->
+          @if (!selectedCategoryId() && movie.categoryName) {
+          <span class="cat-tag">{{ getCategoryIcon(movie.categoryName) }} {{ movie.categoryName }}</span>
+          }
+        </div>
+
+      </div>
 
       } @empty {
-        <div class="empty-state">
-          <div class="empty-icon">🎬</div>
-          <h3>Aucun contenu</h3>
-          <p>Aucun film ou série dans cette catégorie.</p>
-        </div>
+      <div class="empty-state">
+        <div class="empty-icon">🎬</div>
+        <h3>Aucun contenu</h3>
+        <p>Aucun film ou série dans cette catégorie.</p>
+      </div>
       }
     </div>
 

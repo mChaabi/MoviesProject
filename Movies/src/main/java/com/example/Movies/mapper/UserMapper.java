@@ -8,30 +8,21 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     public UserDTO toDTO(User user) {
-        if (user == null) {
-            return null;
-        }
-
         return new UserDTO(
                 user.getId(),
+                user.getName(),
                 user.getEmail(),
-                user.getPassword(),
+                null,              // ✅ Ne jamais renvoyer le mot de passe haché
+                user.getRole(),    // 🆕 Inclure le rôle
                 user.getCreatedAt()
         );
     }
 
     public User toEntity(UserDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        // On utilise le Builder de Lombok défini dans l'entité User
         return User.builder()
-                .id(dto.id())           // Accès Record : pas de "get"
-                .email(dto.email())     // Accès Record
+                .name(dto.name())
+                .email(dto.email())
                 .password(dto.password())
-                // createdAt est souvent géré par @CreationTimestamp,
-                // donc on ne le mappe pas forcément ici
                 .build();
     }
 }
