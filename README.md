@@ -34,7 +34,6 @@ Une application simple pour gérer une bibliothèque de films.
 | <img width="1884" height="828" alt="Content Management System (CMS) - Explorer View" src="https://github.com/user-attachments/assets/f1ef0b5b-cc8f-4f01-b542-7dfedf5b547e" />|
 | *Real-time statistics and data visualization.* | *Centralized hub for managing the movie catalog.* |
 
-### 🎬 User Experience
 ### 🔍 Explore & Discovery
 | Media Details & Interaction | Category Filtering |
 |---|---|
